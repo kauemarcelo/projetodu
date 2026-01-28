@@ -116,7 +116,7 @@ th {
     <br>
 
     <button onclick="saveData()">💾 Salvar</button>
-    <button onclick="exportCSV()">📤 Exportar CSV</button>
+    <button onclick="enviarWhatsApp()">📲 Enviar por WhatsApp (Eduardo)</button>
     <button onclick="window.print()">🖨️ Imprimir</button>
     <button onclick="resetTable()">♻️ Resetar mês</button>
 </div>
@@ -212,26 +212,19 @@ function trocarPeriodo() {
 
 function openModal(celula) {
     celulaAtual = celula;
-    document.getElementById("modal").style.display = "block";
-
+    modal.style.display = "block";
     const valor = celula.innerText;
-    document.getElementById("selectOpcao").value = valor;
-    document.getElementById("textoLivre").value =
-        valor && !valor.startsWith("✔") && !valor.startsWith("✖") &&
-        !valor.startsWith("△") && !valor.startsWith("🙏") &&
-        !valor.startsWith("📖") && !valor.startsWith("💪") &&
-        !valor.startsWith("🕊️") ? valor : "";
+    selectOpcao.value = valor;
+    textoLivre.value = valor && !valor.match(/^[✔✖△🙏📖💪🕊️]/) ? valor : "";
 }
 
 function fecharModal() {
-    document.getElementById("modal").style.display = "none";
+    modal.style.display = "none";
 }
 
 function salvarModal() {
-    const s = selectOpcao.value;
-    const t = textoLivre.value;
-    if (s) celulaAtual.innerText = s;
-    else celulaAtual.innerText = t;
+    if (selectOpcao.value) celulaAtual.innerText = selectOpcao.value;
+    else celulaAtual.innerText = textoLivre.value;
     fecharModal();
     saveData();
 }
@@ -243,18 +236,17 @@ function apagarCelula() {
     saveData();
 }
 
-function exportCSV() {
-    let csv = "";
+function enviarWhatsApp() {
+    let texto = `Horário Espiritual - ${mes.options[mes.selectedIndex].text}/${ano.value}\n\n`;
     document.querySelectorAll("tr").forEach(row => {
-        let cols = [];
-        row.querySelectorAll("th, td").forEach(col => cols.push(`"${col.innerText}"`));
-        csv += cols.join(";") + "\n";
+        let linha = [];
+        row.querySelectorAll("td").forEach(col => {
+            if (col.innerText.trim()) linha.push(col.innerText);
+        });
+        if (linha.length) texto += linha.join(" | ") + "\n";
     });
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "horario_espiritual.csv";
-    link.click();
+    const numero = "5511932275530";
+    window.open(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`, "_blank");
 }
 
 function resetTable() {
