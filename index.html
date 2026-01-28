@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Horário Espiritual</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+h2 {
+    text-align: center;
+}
+
+.controls {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+button {
+    margin: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+th, td {
+    border: 1px solid #000;
+    text-align: center;
+    padding: 4px;
+    min-width: 28px;
+}
+
+th {
+    background: #f0f0f0;
+}
+
+.section {
+    background: #d9d9d9;
+    font-weight: bold;
+}
+
+.editable {
+    cursor: pointer;
+}
+
+.editable:hover {
+    background: #ffffcc;
+}
+
+/* MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    width: 280px;
+    margin: 20% auto;
+    border-radius: 6px;
+    text-align: center;
+}
+
+select, input {
+    width: 90%;
+    padding: 6px;
+    margin-top: 8px;
+}
+
+@media print {
+    .controls { display: none; }
+}
+</style>
+</head>
+
+<body>
+
+<h2>HORÁRIO ESPIRITUAL</h2>
+
+<div class="controls">
+    <button onclick="saveData()">💾 Salvar</button>
+    <button onclick="exportCSV()">📤 Exportar CSV</button>
+    <button onclick="window.print()">🖨️ Imprimir</button>
+    <button onclick="resetTable()">♻️ Resetar</button>
+</div>
+
+<table id="tabela">
+<thead>
+<tr>
+    <th>INTENÇÃO / AÇÃO</th>
+    <script>
+        for (let i = 1; i <= 31; i++) {
+            document.write(`<th>${i}</th>`);
+        }
+    </script>
+</tr>
+</thead>
+
+<tbody>
+<script>
+const secoes = [
+    "Vinculação comigo mesmo",
+    "Vinculação com Deus",
+    "Vinculação com os outros",
+    "Vinculação com o trabalho"
+];
+
+secoes.forEach(secao => {
+    document.write(`
+        <tr><td class="section" colspan="32">${secao}</td></tr>
+        <tr>
+            <td><b>Intenção</b></td>
+            ${"<td class='editable' onclick='openModal(this)'></td>".repeat(31)}
+        </tr>
+        <tr>
+            <td><b>Ação</b></td>
+            ${"<td class='editable' onclick='openModal(this)'></td>".repeat(31)}
+        </tr>
+    `);
+});
+</script>
+</tbody>
+</table>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <h3>Preencher dia</h3>
+
+    <select id="selectOpcao">
+      <option value="">— Selecione —</option>
+      <option>✔ Feito</option>
+      <option>✖ Não feito</option>
+      <option>△ Parcial</option>
+      <option>🙏 Oração</option>
+      <option>📖 Leitura</option>
+      <option>💪 Sacrifício</option>
+      <option>🕊️ Oferecido</option>
+    </select>
+
+    <input type="text" id="textoLivre" placeholder="Ou escreva algo...">
+
+    <br><br>
+
+    <button onclick="salvarModal()">Salvar</button>
+    <button onclick="fecharModal()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+let celulaAtual = null;
+
+function openModal(celula) {
+    celulaAtual = celula;
+    document.getElementById("modal").style.display = "block";
+    document.getElementById("selectOpcao").value = "";
+    document.getElementById("textoLivre").value = "";
+}
+
+function fecharModal() {
+    document.getElementById("modal").style.display = "none";
+}
+
+function salvarModal() {
+    const select = document.getElementById("selectOpcao").value;
+    const texto = document.getElementById("textoLivre").value;
+
+    if (select) {
+        celulaAtual.innerText = select;
+    } else if (texto) {
+        celulaAtual.innerText = texto;
+    }
+
+    fecharModal();
+    saveData();
+}
+
+function saveData() {
+    const cells = document.querySelectorAll(".editable");
+    const data = Array.from(cells).map(c => c.innerText);
+    localStorage.setItem("horarioEspiritual", JSON.stringify(data));
+}
+
+function loadData() {
+    const saved = localStorage.getItem("horarioEspiritual");
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    const cells = document.querySelectorAll(".editable");
+    cells.forEach((c, i) => c.innerText = data[i] || "");
+}
+
+function exportCSV() {
+    let csv = "";
+    document.querySelectorAll("tr").forEach(row => {
+        let cols = [];
+        row.querySelectorAll("th, td").forEach(col => {
+            cols.push(`"${col.innerText.replace(/"/g, '""')}"`);
+        });
+        csv += cols.join(";") + "\n";
+    });
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "horario_espiritual.csv";
+    link.click();
+}
+
+function resetTable() {
+    if (!confirm("Deseja apagar tudo?")) return;
+    document.querySelectorAll(".editable").forEach(c => c.innerText = "");
+    localStorage.removeItem("horarioEspiritual");
+}
+
+window.onload = loadData;
+</script>
+
+</body>
+</html>
