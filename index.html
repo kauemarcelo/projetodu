@@ -75,10 +75,14 @@ th {
 .modal-content {
     background: #fff;
     padding: 20px;
-    width: 280px;
+    width: 300px;
     margin: 20% auto;
     border-radius: 6px;
     text-align: center;
+}
+
+.modal-content button {
+    width: 90%;
 }
 
 @media print {
@@ -107,14 +111,14 @@ th {
         <option value="12">Dezembro</option>
     </select>
 
-    <input type="number" id="ano" value="2026" onchange="trocarPeriodo()" style="width:90px">
+    <input type="number" id="ano" onchange="trocarPeriodo()" style="width:90px">
 
     <br>
 
     <button onclick="saveData()">💾 Salvar</button>
     <button onclick="exportCSV()">📤 Exportar CSV</button>
     <button onclick="window.print()">🖨️ Imprimir</button>
-    <button onclick="resetTable()">♻️ Resetar</button>
+    <button onclick="resetTable()">♻️ Resetar mês</button>
 </div>
 
 <table>
@@ -122,9 +126,7 @@ th {
 <tr>
     <th>INTENÇÃO / AÇÃO</th>
     <script>
-        for (let i = 1; i <= 31; i++) {
-            document.write(`<th>${i}</th>`);
-        }
+        for (let i = 1; i <= 31; i++) document.write(`<th>${i}</th>`);
     </script>
 </tr>
 </thead>
@@ -135,7 +137,7 @@ th {
 <!-- MODAL -->
 <div id="modal" class="modal">
   <div class="modal-content">
-    <h3>Preencher dia</h3>
+    <h3>Editar dia</h3>
 
     <select id="selectOpcao">
       <option value="">— Selecione —</option>
@@ -150,9 +152,10 @@ th {
 
     <input type="text" id="textoLivre" placeholder="Ou escreva algo...">
 
-    <br><br>
+    <br>
 
-    <button onclick="salvarModal()">Salvar</button>
+    <button onclick="salvarModal()">💾 Salvar alteração</button>
+    <button onclick="apagarCelula()">🗑 Apagar conteúdo</button>
     <button onclick="fecharModal()">Cancelar</button>
   </div>
 </div>
@@ -186,11 +189,11 @@ function montarTabela() {
 }
 
 function chaveStorage() {
-    return "horario_" + document.getElementById("mes").value + "_" + document.getElementById("ano").value;
+    return "horario_" + mes.value + "_" + ano.value;
 }
 
 function saveData() {
-    const data = Array.from(document.querySelectorAll(".editable")).map(c => c.innerText);
+    const data = [...document.querySelectorAll(".editable")].map(c => c.innerText);
     localStorage.setItem(chaveStorage(), JSON.stringify(data));
 }
 
@@ -210,8 +213,14 @@ function trocarPeriodo() {
 function openModal(celula) {
     celulaAtual = celula;
     document.getElementById("modal").style.display = "block";
-    document.getElementById("selectOpcao").value = "";
-    document.getElementById("textoLivre").value = "";
+
+    const valor = celula.innerText;
+    document.getElementById("selectOpcao").value = valor;
+    document.getElementById("textoLivre").value =
+        valor && !valor.startsWith("✔") && !valor.startsWith("✖") &&
+        !valor.startsWith("△") && !valor.startsWith("🙏") &&
+        !valor.startsWith("📖") && !valor.startsWith("💪") &&
+        !valor.startsWith("🕊️") ? valor : "";
 }
 
 function fecharModal() {
@@ -219,10 +228,17 @@ function fecharModal() {
 }
 
 function salvarModal() {
-    const s = document.getElementById("selectOpcao").value;
-    const t = document.getElementById("textoLivre").value;
+    const s = selectOpcao.value;
+    const t = textoLivre.value;
     if (s) celulaAtual.innerText = s;
-    else if (t) celulaAtual.innerText = t;
+    else celulaAtual.innerText = t;
+    fecharModal();
+    saveData();
+}
+
+function apagarCelula() {
+    if (!confirm("Apagar este conteúdo?")) return;
+    celulaAtual.innerText = "";
     fecharModal();
     saveData();
 }
@@ -231,9 +247,7 @@ function exportCSV() {
     let csv = "";
     document.querySelectorAll("tr").forEach(row => {
         let cols = [];
-        row.querySelectorAll("th, td").forEach(col => {
-            cols.push(`"${col.innerText}"`);
-        });
+        row.querySelectorAll("th, td").forEach(col => cols.push(`"${col.innerText}"`));
         csv += cols.join(";") + "\n";
     });
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -244,14 +258,14 @@ function exportCSV() {
 }
 
 function resetTable() {
-    if (!confirm("Apagar este mês?")) return;
+    if (!confirm("Apagar todo este mês?")) return;
     localStorage.removeItem(chaveStorage());
     loadData();
 }
 
 const hoje = new Date();
-document.getElementById("mes").value = hoje.getMonth() + 1;
-document.getElementById("ano").value = hoje.getFullYear();
+mes.value = hoje.getMonth() + 1;
+ano.value = hoje.getFullYear();
 
 montarTabela();
 loadData();
