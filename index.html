@@ -7,9 +7,26 @@
 <style>
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
+
+    /* 🌅 FUNDO PADRÃO DE IGREJA */
+    background-image: url('igreja.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    margin: 0;
+    padding: 20px;
 }
 
+/* “Folha” branca que mantém o layout original */
+.wrapper {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    margin: auto;
+}
+
+/* ====== SEU CSS ORIGINAL (INALTERADO) ====== */
 h2 {
     text-align: center;
 }
@@ -86,12 +103,17 @@ th {
 }
 
 @media print {
+    body {
+        background: none;
+    }
     .controls { display: none; }
 }
 </style>
 </head>
 
 <body>
+
+<div class="wrapper">
 
 <h2>HORÁRIO ESPIRITUAL</h2>
 
@@ -133,6 +155,8 @@ th {
 
 <tbody id="tbody"></tbody>
 </table>
+
+</div>
 
 <!-- MODAL -->
 <div id="modal" class="modal">
