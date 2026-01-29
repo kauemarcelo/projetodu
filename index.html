@@ -7,61 +7,31 @@
 <style>
 body {
     font-family: Arial, sans-serif;
-
-    /* 🌅 FUNDO PADRÃO DE IGREJA */
-    background-image: url('igreja.jpg');
+    margin: 20px;
+    background: url("igreja.jpg")
+        no-repeat center fixed;
     background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-
-    margin: 0;
-    padding: 20px;
 }
 
-/* “Folha” branca que mantém o layout original */
-.wrapper {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 20px;
-    margin: auto;
-}
-
-/* ====== SEU CSS ORIGINAL (INALTERADO) ====== */
-h2 {
+h2, .controls {
+    background: rgba(255,255,255,0.95);
+    padding: 10px;
+    border-radius: 6px;
     text-align: center;
-}
-
-.controls {
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-select, input {
-    padding: 6px;
-    margin: 4px;
-}
-
-button {
-    margin: 4px;
-    padding: 6px 12px;
-    cursor: pointer;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
+    background: rgba(255,255,255,0.97);
 }
 
 th, td {
     border: 1px solid #000;
-    text-align: center;
     padding: 4px;
+    text-align: center;
     min-width: 28px;
-}
-
-th {
-    background: #f0f0f0;
 }
 
 .section {
@@ -70,42 +40,46 @@ th {
 }
 
 .editable {
-    cursor: pointer;
+    cursor: text;
 }
 
-.editable:hover {
+.editable:focus {
+    outline: none;
     background: #ffffcc;
 }
 
-/* MODAL */
+/* SEMÁFORO */
+.status-feito { background: #b6f2b6 !important; }
+.status-nao   { background: #f5b6b6 !important; }
+.status-parc  { background: #fff3b0 !important; }
+
+.add-btn, .remove-btn {
+    cursor: pointer;
+    margin-left: 6px;
+    font-weight: bold;
+}
+
+.remove-btn { color: red; }
+
 .modal {
     display: none;
     position: fixed;
-    z-index: 999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background: rgba(0,0,0,0.6);
+    z-index: 999;
 }
 
 .modal-content {
     background: #fff;
     padding: 20px;
-    width: 300px;
+    width: 260px;
     margin: 20% auto;
     border-radius: 6px;
     text-align: center;
 }
 
-.modal-content button {
-    width: 90%;
-}
-
 @media print {
-    body {
-        background: none;
-    }
+    body { background: none; }
     .controls { display: none; }
 }
 </style>
@@ -113,103 +87,124 @@ th {
 
 <body>
 
-<div class="wrapper">
-
 <h2>HORÁRIO ESPIRITUAL</h2>
 
 <div class="controls">
     <select id="mes" onchange="trocarPeriodo()">
-        <option value="1">Janeiro</option>
-        <option value="2">Fevereiro</option>
-        <option value="3">Março</option>
-        <option value="4">Abril</option>
-        <option value="5">Maio</option>
-        <option value="6">Junho</option>
-        <option value="7">Julho</option>
-        <option value="8">Agosto</option>
-        <option value="9">Setembro</option>
-        <option value="10">Outubro</option>
-        <option value="11">Novembro</option>
-        <option value="12">Dezembro</option>
+        <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+        <option value="3">Março</option><option value="4">Abril</option>
+        <option value="5">Maio</option><option value="6">Junho</option>
+        <option value="7">Julho</option><option value="8">Agosto</option>
+        <option value="9">Setembro</option><option value="10">Outubro</option>
+        <option value="11">Novembro</option><option value="12">Dezembro</option>
     </select>
-
-    <input type="number" id="ano" onchange="trocarPeriodo()" style="width:90px">
-
+    <input type="number" id="ano" style="width:90px" onchange="trocarPeriodo()">
     <br>
-
     <button onclick="saveData()">💾 Salvar</button>
     <button onclick="enviarWhatsApp()">📲 Enviar por WhatsApp (Eduardo)</button>
     <button onclick="window.print()">🖨️ Imprimir</button>
-    <button onclick="resetTable()">♻️ Resetar mês</button>
 </div>
 
 <table>
 <thead>
 <tr>
-    <th>INTENÇÃO / AÇÃO</th>
-    <script>
-        for (let i = 1; i <= 31; i++) document.write(`<th>${i}</th>`);
-    </script>
+    <th>AÇÃO</th>
+    <script>for(let i=1;i<=31;i++)document.write(`<th>${i}</th>`)</script>
 </tr>
 </thead>
-
 <tbody id="tbody"></tbody>
 </table>
 
-</div>
-
-<!-- MODAL -->
+<!-- MODAL STATUS -->
 <div id="modal" class="modal">
   <div class="modal-content">
-    <h3>Editar dia</h3>
+    <h3>Status da ação</h3>
 
-    <select id="selectOpcao">
-      <option value="">— Selecione —</option>
-      <option>✔ Feito</option>
-      <option>✖ Não feito</option>
-      <option>△ Parcial</option>
-      <option>🙏 Oração</option>
-      <option>📖 Leitura</option>
-      <option>💪 Sacrifício</option>
-      <option>🕊️ Oferecido</option>
+    <select id="statusSelect">
+        <option value="">— Selecione —</option>
+        <option value="feito">🟢 Feito</option>
+        <option value="nao">🔴 Não feito</option>
+        <option value="parc">🟡 Parcial</option>
     </select>
 
-    <input type="text" id="textoLivre" placeholder="Ou escreva algo...">
+    <br><br>
 
-    <br>
-
-    <button onclick="salvarModal()">💾 Salvar alteração</button>
-    <button onclick="apagarCelula()">🗑 Apagar conteúdo</button>
+    <button onclick="aplicarStatus()">Salvar</button>
     <button onclick="fecharModal()">Cancelar</button>
   </div>
 </div>
 
 <script>
 const secoes = [
-    "Vinculação comigo mesmo",
-    "Vinculação com Deus",
-    "Vinculação com os outros",
-    "Vinculação com o trabalho"
+  "Vinculação comigo mesmo",
+  "Vinculação com Deus",
+  "Vinculação com os outros",
+  "Vinculação com o trabalho"
 ];
 
 const tbody = document.getElementById("tbody");
 let celulaAtual = null;
+
+function criarLinhaAcao() {
+    return `
+    <tr class="linha-acao">
+        <td>
+            <b>Ação</b>
+            <span class="add-btn" onclick="adicionarLinha(this)">➕</span>
+            <span class="remove-btn" onclick="removerLinha(this)">❌</span>
+        </td>
+        ${"<td class='editable' contenteditable='true' onblur='abrirStatus(this)'></td>".repeat(31)}
+    </tr>`;
+}
 
 function montarTabela() {
     tbody.innerHTML = "";
     secoes.forEach(secao => {
         tbody.innerHTML += `
             <tr><td class="section" colspan="32">${secao}</td></tr>
-            <tr>
-                <td><b>Intenção</b></td>
-                ${"<td class='editable' onclick='openModal(this)'></td>".repeat(31)}
-            </tr>
-            <tr>
-                <td><b>Ação</b></td>
-                ${"<td class='editable' onclick='openModal(this)'></td>".repeat(31)}
-            </tr>
+            ${criarLinhaAcao()}
         `;
     });
+}
+
+function adicionarLinha(btn) {
+    btn.closest("tr").insertAdjacentHTML("afterend", criarLinhaAcao());
+    saveData();
+}
+
+function removerLinha(btn) {
+    if (!confirm("Apagar esta ação inteira?")) return;
+    btn.closest("tr").remove();
+    saveData();
+}
+
+function abrirStatus(td) {
+    // Se apagou o texto → limpa status e não abre modal
+    if (!td.innerText.trim()) {
+        td.classList.remove("status-feito", "status-nao", "status-parc");
+        saveData();
+        return;
+    }
+
+    celulaAtual = td;
+    modal.style.display = "block";
+}
+
+function aplicarStatus() {
+    celulaAtual.classList.remove("status-feito", "status-nao", "status-parc");
+
+    const v = statusSelect.value;
+    if (v && celulaAtual.innerText.trim()) {
+        celulaAtual.classList.add("status-" + v);
+    }
+
+    fecharModal();
+    saveData();
+}
+
+function fecharModal() {
+    modal.style.display = "none";
+    statusSelect.value = "";
 }
 
 function chaveStorage() {
@@ -217,16 +212,34 @@ function chaveStorage() {
 }
 
 function saveData() {
-    const data = [...document.querySelectorAll(".editable")].map(c => c.innerText);
+    const data = [];
+    document.querySelectorAll(".linha-acao").forEach(row => {
+        const linha = [];
+        row.querySelectorAll(".editable").forEach(td => {
+            linha.push({
+                texto: td.innerText,
+                status: td.className
+            });
+        });
+        data.push(linha);
+    });
     localStorage.setItem(chaveStorage(), JSON.stringify(data));
 }
 
 function loadData() {
-    document.querySelectorAll(".editable").forEach(c => c.innerText = "");
     const saved = localStorage.getItem(chaveStorage());
     if (!saved) return;
+
     const data = JSON.parse(saved);
-    document.querySelectorAll(".editable").forEach((c, i) => c.innerText = data[i] || "");
+    document.querySelectorAll(".linha-acao").forEach((row, i) => {
+        if (!data[i]) return;
+        row.querySelectorAll(".editable").forEach((td, j) => {
+            const c = data[i][j];
+            if (!c) return;
+            td.innerText = c.texto;
+            td.className = "editable " + (c.status || "");
+        });
+    });
 }
 
 function trocarPeriodo() {
@@ -234,53 +247,16 @@ function trocarPeriodo() {
     loadData();
 }
 
-function openModal(celula) {
-    celulaAtual = celula;
-    modal.style.display = "block";
-    const valor = celula.innerText;
-    selectOpcao.value = valor;
-    textoLivre.value = valor && !valor.match(/^[✔✖△🙏📖💪🕊️]/) ? valor : "";
-}
-
-function fecharModal() {
-    modal.style.display = "none";
-}
-
-function salvarModal() {
-    if (selectOpcao.value) celulaAtual.innerText = selectOpcao.value;
-    else celulaAtual.innerText = textoLivre.value;
-    fecharModal();
-    saveData();
-}
-
-function apagarCelula() {
-    if (!confirm("Apagar este conteúdo?")) return;
-    celulaAtual.innerText = "";
-    fecharModal();
-    saveData();
-}
-
 function enviarWhatsApp() {
     let texto = `Horário Espiritual - ${mes.options[mes.selectedIndex].text}/${ano.value}\n\n`;
-    document.querySelectorAll("tr").forEach(row => {
-        let linha = [];
-        row.querySelectorAll("td").forEach(col => {
-            if (col.innerText.trim()) linha.push(col.innerText);
-        });
-        if (linha.length) texto += linha.join(" | ") + "\n";
+    document.querySelectorAll(".editable").forEach(td => {
+        if (td.innerText.trim()) texto += td.innerText + "\n";
     });
-    const numero = "5511932275530";
-    window.open(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`, "_blank");
-}
-
-function resetTable() {
-    if (!confirm("Apagar todo este mês?")) return;
-    localStorage.removeItem(chaveStorage());
-    loadData();
+    window.open(`https://wa.me/5511932275530?text=${encodeURIComponent(texto)}`, "_blank");
 }
 
 const hoje = new Date();
-mes.value = hoje.getMonth() + 1;
+mes.value = hoje.getMonth()+1;
 ano.value = hoje.getFullYear();
 
 montarTabela();
