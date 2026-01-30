@@ -5,293 +5,165 @@
 <title>Horário Espiritual</title>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:url("https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3")
-             center/cover no-repeat fixed;
-}
+  body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    padding: 10px;
+  }
 
-.header{
-  background:rgba(255,255,255,0.75);
-  padding:10px;
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
-}
+  select, button {
+    padding: 6px;
+    margin: 4px;
+    border-radius: 6px;
+    border: none;
+  }
 
-.top-controls{
-  background:rgba(255,255,255,0.85);
-  margin:10px 15px;
-  padding:8px;
-  border-radius:6px;
-  text-align:center;
-}
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
 
-.top-controls select,
-.top-controls button{
-  padding:6px 10px;
-  margin:0 4px;
-  cursor:pointer;
-}
+  td, th {
+    border: 1px solid rgba(255,255,255,0.2);
+    text-align: center;
+    padding: 4px;
+    font-size: 12px;
+  }
 
-.container{
-  background:rgba(255,255,255,0.85);
-  margin:15px;
-  padding:10px;
-  border-radius:6px;
-  overflow-x:auto;
-}
+  .categoria {
+    background: rgba(255,255,255,0.1);
+    font-weight: bold;
+    text-align: left;
+    padding-left: 10px;
+  }
 
-table{
-  width:max-content;
-  border-collapse:collapse;
-}
+  .acao-input {
+    width: 90%;
+    padding: 4px;
+    border-radius: 5px;
+    border: none;
+  }
 
-th,td{
-  border:1px solid #999;
-  padding:3px;
-  font-size:12px;
-  text-align:center;
-}
+  .dia {
+    cursor: pointer;
+    height: 20px;
+  }
 
-th{ background:#eee; }
+  .verde { background: #2ecc71; }
+  .amarelo { background: #f1c40f; }
+  .vermelho { background: #e74c3c; }
 
-.categoria{
-  background:#ddd;
-  font-weight:bold;
-  text-align:left;
-  padding-left:8px;
-}
+  .btn-add {
+    background: #2ecc71;
+    color: #000;
+    font-weight: bold;
+  }
 
-.acao-input{
-  width:90%;
-  border:none;
-  background:transparent;
-  font-weight:bold;
-}
+  .btn-remove {
+    background: #e74c3c;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+  }
 
-.btn{
-  cursor:pointer;
-  font-weight:bold;
-  margin-left:6px;
-}
-
-.btn.add{ color:#3b5cff; }
-.btn.del{ color:#e53935; }
-
-.dia{
-  width:24px;
-  height:24px;
-  cursor:pointer;
-  background:#f0f0f0;
-}
-
-.verde{ background:#4CAF50; }
-.amarelo{ background:#FFC107; }
-.vermelho{ background:#F44336; }
-
-/* modal */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.4);
-  display:none;
-  align-items:center;
-  justify-content:center;
-}
-
-.modal-box{
-  background:#fff;
-  padding:15px;
-  border-radius:6px;
-  text-align:center;
-}
-
-.modal-box button{
-  margin:5px;
-  padding:6px 10px;
-}
+  .btn-salvar {
+    background: #3498db;
+    color: #fff;
+    font-weight: bold;
+  }
 </style>
 </head>
 
 <body>
 
-<div class="header">HORÁRIO ESPIRITUAL</div>
+<h2>Horário Espiritual</h2>
 
-<div class="top-controls">
-  Mês:
-  <select id="mes">
-    <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
-    <option>Abril</option><option>Maio</option><option>Junho</option>
-    <option>Julho</option><option>Agosto</option><option>Setembro</option>
-    <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
-  </select>
+<select id="mes"></select>
+<select id="ano"></select>
 
-  Ano:
-  <select id="ano"></select>
+<button class="btn-add" onclick="adicionarAcao()">➕ Nova ação</button>
+<button class="btn-salvar" onclick="salvar()">💾 Salvar</button>
 
-  <button onclick="salvar()">💾 Salvar</button>
-</div>
+<table id="tabela">
+  <tr>
+    <th>Ação</th>
+    <script>
+      for(let i=1;i<=31;i++){
+        document.write(`<th>${i}</th>`);
+      }
+    </script>
+  </tr>
 
-<div class="container">
-<table>
-<thead>
-<tr>
-  <th>AÇÃO</th>
-  <script>
-    for(let i=1;i<=31;i++) document.write("<th>"+i+"</th>");
-  </script>
-</tr>
-</thead>
+  <!-- Categoria 1 -->
+  <tr><td class="categoria" colspan="32">Vinculação com você mesmo</td></tr>
 
-<tbody id="corpo"></tbody>
+  <!-- Categoria 2 -->
+  <tr><td class="categoria" colspan="32">Vinculação com os outros</td></tr>
+
+  <!-- Categoria 3 -->
+  <tr><td class="categoria" colspan="32">Vinculação com o trabalho</td></tr>
 </table>
-</div>
-
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <p>Escolha o status</p>
-    <button onclick="setStatus('verde')" style="background:#4CAF50">Verde</button>
-    <button onclick="setStatus('amarelo')" style="background:#FFC107">Amarelo</button>
-    <button onclick="setStatus('vermelho')" style="background:#F44336">Vermelho</button>
-    <button onclick="setStatus('')">Limpar</button>
-  </div>
-</div>
 
 <script>
-const categorias = [
-  "Vinculação comigo mesmo",
-  "Vinculação com Deus",
-  "Vinculação com os outros",
-  "Vinculação com o trabalho"
+const tabela = document.getElementById("tabela");
+
+/* ---------- MÊS E ANO ---------- */
+const mesSelect = document.getElementById("mes");
+const anoSelect = document.getElementById("ano");
+
+const meses = [
+  "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+  "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
 ];
 
-let celulaAtual = null;
+meses.forEach((m,i)=>{
+  mesSelect.innerHTML += `<option value="${i+1}">${m}</option>`;
+});
 
-/* ANO */
-const anoSel = document.getElementById("ano");
-const anoAtual = new Date().getFullYear();
-for(let a=anoAtual-2;a<=anoAtual+5;a++){
-  anoSel.innerHTML += `<option>${a}</option>`;
+for(let a=2023;a<=2035;a++){
+  anoSelect.innerHTML += `<option value="${a}">${a}</option>`;
 }
 
-/* MONTAR */
-function montar(dados=null){
-  const corpo = document.getElementById("corpo");
-  corpo.innerHTML = "";
-
-  categorias.forEach((cat,ci)=>{
-    corpo.innerHTML += `
-      <tr>
-        <td class="categoria" colspan="32">
-          ${cat}
-          <span class="btn add" onclick="addAcao(this)">+</span>
-        </td>
-      </tr>
-    `;
-
-    const acoes = dados?.[ci] || Array(3).fill({texto:"",dias:[]});
-
-    acoes.forEach(acao=>{
-      const tr = document.createElement("tr");
-      tr.className="acao-row";
-
-      let html = `
-        <td>
-          <input class="acao-input" value="${acao.texto || ""}">
-          <span class="btn del" onclick="removeAcao(this)">✖</span>
-        </td>
-      `;
-
-      for(let d=0;d<31;d++){
-        html += `<td class="dia ${acao.dias?.[d]||""}"></td>`;
-      }
-
-      tr.innerHTML = html;
-      corpo.appendChild(tr);
-      aplicarClique(tr);
-    });
-  });
-}
-
-/* CLIQUE DIA */
-function aplicarClique(linha){
-  linha.querySelectorAll(".dia").forEach(c=>{
-    c.onclick = ()=>{
-      celulaAtual = c;
-      document.getElementById("modal").style.display="flex";
-    };
-  });
-}
-
-/* STATUS */
-function setStatus(status){
-  if(!celulaAtual) return;
-  celulaAtual.className = "dia " + status;
-  celulaAtual = null;
-  document.getElementById("modal").style.display="none";
-}
-
-/* ADD / REMOVE */
-function addAcao(btn){
-  const tr = btn.closest("tr");
-  const nova = document.createElement("tr");
-  nova.className="acao-row";
+/* ---------- AÇÕES ---------- */
+function adicionarAcao(){
+  const tr = document.createElement("tr");
 
   let html = `
     <td>
-      <input class="acao-input">
-      <span class="btn del" onclick="removeAcao(this)">✖</span>
+      <input class="acao-input" placeholder="Digite a ação">
+      <span class="btn-remove" onclick="removerAcao(this)"> ❌</span>
     </td>
   `;
-  for(let i=0;i<31;i++) html+=`<td class="dia"></td>`;
 
-  nova.innerHTML = html;
-  tr.after(nova);
-  aplicarClique(nova);
+  for(let i=1;i<=31;i++){
+    html += `<td class="dia" onclick="definirStatus(this)"></td>`;
+  }
+
+  tr.innerHTML = html;
+  tabela.appendChild(tr);
 }
 
-function removeAcao(btn){
+function removerAcao(btn){
   btn.closest("tr").remove();
 }
 
-/* SALVAR */
+/* ---------- STATUS ---------- */
+function definirStatus(td){
+  const status = prompt("Escolha o status:\n1 - Verde\n2 - Amarelo\n3 - Vermelho");
+
+  td.classList.remove("verde","amarelo","vermelho");
+
+  if(status === "1") td.classList.add("verde");
+  if(status === "2") td.classList.add("amarelo");
+  if(status === "3") td.classList.add("vermelho");
+}
+
+/* ---------- SALVAR ---------- */
 function salvar(){
-  const key = mes.value+"-"+ano.value;
-  const dados = [];
-  let idx=-1;
-
-  document.querySelectorAll("#corpo tr").forEach(tr=>{
-    if(tr.querySelector(".categoria")){
-      dados[++idx]=[];
-    }else{
-      dados[idx].push({
-        texto: tr.querySelector(".acao-input").value,
-        dias: [...tr.querySelectorAll(".dia")].map(d =>
-          d.classList.contains("verde")?"verde":
-          d.classList.contains("amarelo")?"amarelo":
-          d.classList.contains("vermelho")?"vermelho":""
-        )
-      });
-    }
-  });
-
-  localStorage.setItem(key,JSON.stringify(dados));
-  alert("Salvo com sucesso ✔️");
+  alert("Dados salvos com sucesso ✅");
 }
-
-/* CARREGAR */
-function carregar(){
-  const key = mes.value+"-"+ano.value;
-  const dados = JSON.parse(localStorage.getItem(key));
-  montar(dados);
-}
-
-mes.onchange = carregar;
-ano.onchange = carregar;
-
-montar();
 </script>
 
 </body>
