@@ -28,9 +28,11 @@ body{
   text-align:center;
 }
 
-.top-controls select{
-  padding:4px;
-  margin:0 5px;
+.top-controls select,
+.top-controls button{
+  padding:6px 10px;
+  margin:0 4px;
+  cursor:pointer;
 }
 
 .container{
@@ -89,11 +91,10 @@ th{ background:#eee; }
 .amarelo{ background:#FFC107; }
 .vermelho{ background:#F44336; }
 
-/* modal simples */
+/* modal */
 .modal{
   position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
+  inset:0;
   background:rgba(0,0,0,0.4);
   display:none;
   align-items:center;
@@ -110,7 +111,6 @@ th{ background:#eee; }
 .modal-box button{
   margin:5px;
   padding:6px 10px;
-  cursor:pointer;
 }
 </style>
 </head>
@@ -130,10 +130,12 @@ th{ background:#eee; }
 
   Ano:
   <select id="ano"></select>
+
+  <button onclick="salvar()">💾 Salvar</button>
 </div>
 
 <div class="container">
-<table>
+<table id="tabela">
 
 <thead>
 <tr>
@@ -144,7 +146,21 @@ th{ background:#eee; }
 </tr>
 </thead>
 
-<tbody>
+<tbody id="corpo"></tbody>
+
+</table>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <p>Escolha o status</p>
+    <button onclick="setStatus('verde')" style="background:#4CAF50">Verde</button>
+    <button onclick="setStatus('amarelo')" style="background:#FFC107">Amarelo</button>
+    <button onclick="setStatus('vermelho')" style="background:#F44336">Vermelho</button>
+    <button onclick="setStatus('')">Limpar</button>
+  </div>
+</div>
 
 <script>
 const categorias = [
@@ -154,72 +170,55 @@ const categorias = [
   "Vinculação com o trabalho"
 ];
 
-categorias.forEach(nome=>{
-  document.write(`
-    <tr>
-      <td class="categoria" colspan="32">
-        ${nome}
-        <span class="btn add" onclick="addAcao(this)">+</span>
-      </td>
-    </tr>
-  `);
-
-  for(let a=0;a<3;a++){
-    document.write("<tr class='acao-row'>");
-    document.write(`
-      <td>
-        <input class="acao-input" placeholder="Digite a ação do mês">
-        <span class="btn del" onclick="removeAcao(this)">✖</span>
-      </td>
-    `);
-    for(let i=1;i<=31;i++){
-      document.write("<td class='dia'></td>");
-    }
-    document.write("</tr>");
-  }
-});
-</script>
-
-</tbody>
-</table>
-</div>
-
-<!-- MODAL STATUS -->
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <p>Escolha o status do dia</p>
-    <button onclick="setStatus('verde')" style="background:#4CAF50">Verde</button>
-    <button onclick="setStatus('amarelo')" style="background:#FFC107">Amarelo</button>
-    <button onclick="setStatus('vermelho')" style="background:#F44336">Vermelho</button>
-    <button onclick="setStatus('')">Limpar</button>
-  </div>
-</div>
-
-<script>
-const estados = ["verde","amarelo","vermelho"];
 let celulaAtual = null;
 
-/* ano dinâmico */
+/* ano */
 const anoSel = document.getElementById("ano");
 const anoAtual = new Date().getFullYear();
 for(let a=anoAtual-2;a<=anoAtual+5;a++){
   anoSel.innerHTML += `<option>${a}</option>`;
 }
 
-/* clique no dia */
-document.querySelectorAll(".dia").forEach(c=>{
-  c.onclick = ()=>{
-    celulaAtual = c;
-    document.getElementById("modal").style.display="flex";
-  };
-});
+/* monta tabela */
+function montar(dados=null){
+  const corpo = document.getElementById("corpo");
+  corpo.innerHTML = "";
 
-function setStatus(status){
-  celulaAtual.className = "dia " + status;
-  document.getElementById("modal").style.display="none";
+  categorias.forEach((cat,ci)=>{
+    corpo.innerHTML += `
+      <tr>
+        <td class="categoria" colspan="32">
+          ${cat}
+          <span class="btn add" onclick="addAcao(this)">+</span>
+        </td>
+      </tr>
+    `;
+
+    const acoes = dados?.[ci] || Array(3).fill({texto:"",dias:[]});
+
+    acoes.forEach(acao=>{
+      let row = document.createElement("tr");
+      row.className="acao-row";
+
+      let html = `
+        <td>
+          <input class="acao-input" value="${acao.texto || ""}">
+          <span class="btn del" onclick="removeAcao(this)">✖</span>
+        </td>
+      `;
+
+      for(let d=0;d<31;d++){
+        html += `<td class="dia ${acao.dias?.[d]||""}"></td>`;
+      }
+
+      row.innerHTML = html;
+      corpo.appendChild(row);
+      aplicarClique(row);
+    });
+  });
 }
 
-/* aplicar clique ao adicionar ações */
+/* clique dia */
 function aplicarClique(linha){
   linha.querySelectorAll(".dia").forEach(c=>{
     c.onclick = ()=>{
@@ -229,29 +228,70 @@ function aplicarClique(linha){
   });
 }
 
+function setStatus(st){
+  celulaAtual.className = "dia " + st;
+  document.getElementById("modal").style.display="none";
+}
+
+/* add/remove */
 function addAcao(btn){
-  const cat = btn.closest("tr");
+  const tr = btn.closest("tr");
   const nova = document.createElement("tr");
-  nova.className = "acao-row";
+  nova.className="acao-row";
 
   let html = `
     <td>
-      <input class="acao-input" placeholder="Digite a ação do mês">
+      <input class="acao-input">
       <span class="btn del" onclick="removeAcao(this)">✖</span>
     </td>
   `;
+  for(let i=0;i<31;i++) html+=`<td class="dia"></td>`;
 
-  for(let i=1;i<=31;i++) html += `<td class="dia"></td>`;
   nova.innerHTML = html;
-  cat.after(nova);
+  tr.after(nova);
   aplicarClique(nova);
 }
 
 function removeAcao(btn){
   btn.closest("tr").remove();
 }
+
+/* salvar */
+function salvar(){
+  const key = document.getElementById("mes").value+"-"+document.getElementById("ano").value;
+  const dados = [];
+  let idx = -1;
+
+  document.querySelectorAll("#corpo tr").forEach(tr=>{
+    if(tr.querySelector(".categoria")){
+      dados[++idx]=[];
+    }else{
+      const texto = tr.querySelector(".acao-input").value;
+      const dias = [...tr.querySelectorAll(".dia")].map(d=>{
+        d.classList.contains("verde")?"verde":
+        d.classList.contains("amarelo")?"amarelo":
+        d.classList.contains("vermelho")?"vermelho":""
+      });
+      dados[idx].push({texto,dias});
+    }
+  });
+
+  localStorage.setItem(key,JSON.stringify(dados));
+  alert("Salvo com sucesso ✔️");
+}
+
+/* carregar */
+function carregar(){
+  const key = document.getElementById("mes").value+"-"+document.getElementById("ano").value;
+  const dados = JSON.parse(localStorage.getItem(key));
+  montar(dados);
+}
+
+document.getElementById("mes").onchange = carregar;
+document.getElementById("ano").onchange = carregar;
+
+montar();
 </script>
 
 </body>
 </html>
-
