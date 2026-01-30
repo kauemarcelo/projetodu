@@ -8,7 +8,7 @@
 body{
   margin:0;
   font-family:Arial, sans-serif;
-  background:url("igreja.jpg")
+  background:url("https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3")
              center/cover no-repeat fixed;
 }
 
@@ -135,8 +135,7 @@ th{ background:#eee; }
 </div>
 
 <div class="container">
-<table id="tabela">
-
+<table>
 <thead>
 <tr>
   <th>AÇÃO</th>
@@ -147,11 +146,9 @@ th{ background:#eee; }
 </thead>
 
 <tbody id="corpo"></tbody>
-
 </table>
 </div>
 
-<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <p>Escolha o status</p>
@@ -172,14 +169,14 @@ const categorias = [
 
 let celulaAtual = null;
 
-/* ano */
+/* ANO */
 const anoSel = document.getElementById("ano");
 const anoAtual = new Date().getFullYear();
 for(let a=anoAtual-2;a<=anoAtual+5;a++){
   anoSel.innerHTML += `<option>${a}</option>`;
 }
 
-/* monta tabela */
+/* MONTAR */
 function montar(dados=null){
   const corpo = document.getElementById("corpo");
   corpo.innerHTML = "";
@@ -197,8 +194,8 @@ function montar(dados=null){
     const acoes = dados?.[ci] || Array(3).fill({texto:"",dias:[]});
 
     acoes.forEach(acao=>{
-      let row = document.createElement("tr");
-      row.className="acao-row";
+      const tr = document.createElement("tr");
+      tr.className="acao-row";
 
       let html = `
         <td>
@@ -211,14 +208,14 @@ function montar(dados=null){
         html += `<td class="dia ${acao.dias?.[d]||""}"></td>`;
       }
 
-      row.innerHTML = html;
-      corpo.appendChild(row);
-      aplicarClique(row);
+      tr.innerHTML = html;
+      corpo.appendChild(tr);
+      aplicarClique(tr);
     });
   });
 }
 
-/* clique dia */
+/* CLIQUE DIA */
 function aplicarClique(linha){
   linha.querySelectorAll(".dia").forEach(c=>{
     c.onclick = ()=>{
@@ -228,12 +225,15 @@ function aplicarClique(linha){
   });
 }
 
-function setStatus(st){
-  celulaAtual.className = "dia " + st;
+/* STATUS */
+function setStatus(status){
+  if(!celulaAtual) return;
+  celulaAtual.className = "dia " + status;
+  celulaAtual = null;
   document.getElementById("modal").style.display="none";
 }
 
-/* add/remove */
+/* ADD / REMOVE */
 function addAcao(btn){
   const tr = btn.closest("tr");
   const nova = document.createElement("tr");
@@ -256,23 +256,24 @@ function removeAcao(btn){
   btn.closest("tr").remove();
 }
 
-/* salvar */
+/* SALVAR */
 function salvar(){
-  const key = document.getElementById("mes").value+"-"+document.getElementById("ano").value;
+  const key = mes.value+"-"+ano.value;
   const dados = [];
-  let idx = -1;
+  let idx=-1;
 
   document.querySelectorAll("#corpo tr").forEach(tr=>{
     if(tr.querySelector(".categoria")){
       dados[++idx]=[];
     }else{
-      const texto = tr.querySelector(".acao-input").value;
-      const dias = [...tr.querySelectorAll(".dia")].map(d=>{
-        d.classList.contains("verde")?"verde":
-        d.classList.contains("amarelo")?"amarelo":
-        d.classList.contains("vermelho")?"vermelho":""
+      dados[idx].push({
+        texto: tr.querySelector(".acao-input").value,
+        dias: [...tr.querySelectorAll(".dia")].map(d =>
+          d.classList.contains("verde")?"verde":
+          d.classList.contains("amarelo")?"amarelo":
+          d.classList.contains("vermelho")?"vermelho":""
+        )
       });
-      dados[idx].push({texto,dias});
     }
   });
 
@@ -280,15 +281,15 @@ function salvar(){
   alert("Salvo com sucesso ✔️");
 }
 
-/* carregar */
+/* CARREGAR */
 function carregar(){
-  const key = document.getElementById("mes").value+"-"+document.getElementById("ano").value;
+  const key = mes.value+"-"+ano.value;
   const dados = JSON.parse(localStorage.getItem(key));
   montar(dados);
 }
 
-document.getElementById("mes").onchange = carregar;
-document.getElementById("ano").onchange = carregar;
+mes.onchange = carregar;
+ano.onchange = carregar;
 
 montar();
 </script>
