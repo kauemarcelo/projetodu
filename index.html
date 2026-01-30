@@ -88,7 +88,6 @@ th{ background:#eee; }
 .amarelo{ background:#FFC107; }
 .vermelho{ background:#F44336; }
 
-/* modal */
 .modal{
   position:fixed;
   top:0; left:0;
@@ -135,7 +134,6 @@ th{ background:#eee; }
 
 <div class="container">
 <table>
-
 <thead>
 <tr>
   <th>AÇÃO</th>
@@ -145,47 +143,10 @@ th{ background:#eee; }
 </tr>
 </thead>
 
-<tbody>
-
-<script>
-const categorias = [
-  "Vinculação comigo mesmo",
-  "Vinculação com Deus",
-  "Vinculação com os outros",
-  "Vinculação com o trabalho"
-];
-
-categorias.forEach(nome=>{
-  document.write(`
-    <tr>
-      <td class="categoria" colspan="32">
-        ${nome}
-        <span class="btn add" onclick="addAcao(this)">+</span>
-      </td>
-    </tr>
-  `);
-
-  for(let a=0;a<3;a++){
-    document.write("<tr class='acao-row'>");
-    document.write(`
-      <td>
-        <input class="acao-input" placeholder="Digite a ação do mês">
-        <span class="btn del" onclick="removeAcao(this)">✖</span>
-      </td>
-    `);
-    for(let i=1;i<=31;i++){
-      document.write("<td class='dia'></td>");
-    }
-    document.write("</tr>");
-  }
-});
-</script>
-
-</tbody>
+<tbody id="tbody"></tbody>
 </table>
 </div>
 
-<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <p>Escolha o status do dia</p>
@@ -197,29 +158,67 @@ categorias.forEach(nome=>{
 </div>
 
 <script>
+const categorias = [
+  "Vinculação comigo mesmo",
+  "Vinculação com Deus",
+  "Vinculação com os outros",
+  "Vinculação com o trabalho"
+];
+
+const tbody = document.getElementById("tbody");
 let celulaAtual = null;
 
 /* ---------- ANO ---------- */
 const anoSel = document.getElementById("ano");
 const anoAtual = new Date().getFullYear();
-
 for(let a=anoAtual; a<=anoAtual+5; a++){
   anoSel.innerHTML += `<option>${a}</option>`;
 }
 
+/* ---------- TABELA ---------- */
+function montarTabela(){
+  tbody.innerHTML = "";
 
-/* ---------- ATIVAR CLIQUE ---------- */
-function ativarDias(contexto=document){
-  contexto.querySelectorAll(".dia").forEach(c=>{
-    c.onclick = ()=>{
-      celulaAtual = c;
+  categorias.forEach(nome=>{
+    const trCat = document.createElement("tr");
+    trCat.innerHTML = `
+      <td class="categoria" colspan="32">
+        ${nome}
+        <span class="btn add" onclick="addAcao(this)">+</span>
+      </td>`;
+    tbody.appendChild(trCat);
+
+    for(let i=0;i<3;i++) adicionarLinha(trCat);
+  });
+
+  ativarDias();
+}
+
+function adicionarLinha(ref){
+  const tr = document.createElement("tr");
+  tr.className = "acao-row";
+
+  let html = `
+    <td>
+      <input class="acao-input" placeholder="Digite a ação do mês">
+      <span class="btn del" onclick="removeAcao(this)">✖</span>
+    </td>`;
+  for(let i=1;i<=31;i++) html += `<td class="dia"></td>`;
+
+  tr.innerHTML = html;
+  ref.after(tr);
+}
+
+/* ---------- DIAS ---------- */
+function ativarDias(){
+  document.querySelectorAll(".dia").forEach(d=>{
+    d.onclick = ()=>{
+      celulaAtual = d;
       document.getElementById("modal").style.display="flex";
     };
   });
 }
-ativarDias();
 
-/* ---------- STATUS ---------- */
 function setStatus(status){
   if(!celulaAtual) return;
   celulaAtual.className = "dia " + status;
@@ -228,85 +227,56 @@ function setStatus(status){
 
 /* ---------- AÇÕES ---------- */
 function addAcao(btn){
-  const cat = btn.closest("tr");
-  const nova = document.createElement("tr");
-  nova.className = "acao-row";
-
-  let html = `
-    <td>
-      <input class="acao-input" placeholder="Digite a ação do mês">
-      <span class="btn del" onclick="removeAcao(this)">✖</span>
-    </td>
-  `;
-  for(let i=1;i<=31;i++) html += `<td class="dia"></td>`;
-  nova.innerHTML = html;
-
-  cat.after(nova);
-  ativarDias(nova);
+  adicionarLinha(btn.closest("tr"));
+  ativarDias();
 }
 
 function removeAcao(btn){
   btn.closest("tr").remove();
 }
 
-/* ---------- SALVAR ---------- */
+/* ---------- SALVAR / CARREGAR ---------- */
 function salvar(){
-  const dados = {
-    mes: document.getElementById("mes").value,
-    ano: document.getElementById("ano").value,
-    acoes: []
-  };
-
-  document.querySelectorAll(".acao-row").forEach(row=>{
-    const acao = row.querySelector(".acao-input").value;
-    const dias = [];
-
-    row.querySelectorAll(".dia").forEach(d=>{
-      dias.push(
-        d.classList.contains("verde") ? "verde" :
-        d.classList.contains("amarelo") ? "amarelo" :
-        d.classList.contains("vermelho") ? "vermelho" : ""
-      );
-    });
-
-    dados.acoes.push({acao, dias});
+  const dados = [];
+  document.querySelectorAll(".acao-row").forEach(r=>{
+    const acao = r.querySelector(".acao-input").value;
+    const dias = [...r.querySelectorAll(".dia")].map(d=>
+      d.classList.contains("verde") ? "verde" :
+      d.classList.contains("amarelo") ? "amarelo" :
+      d.classList.contains("vermelho") ? "vermelho" : ""
+    );
+    dados.push({acao,dias});
   });
 
-  const chave = `horario_${dados.mes}_${dados.ano}`;
+  const chave = `horario_${mes.value}_${ano.value}`;
   localStorage.setItem(chave, JSON.stringify(dados));
-
-  alert("Horário espiritual salvo com sucesso 🙏");
+  alert("Salvo com sucesso 🙏");
 }
 
-/* ---------- CARREGAR ---------- */
 function carregar(){
-  const mes = document.getElementById("mes").value;
-  const ano = document.getElementById("ano").value;
-  const chave = `horario_${mes}_${ano}`;
-
+  montarTabela();
+  const chave = `horario_${mes.value}_${ano.value}`;
   const salvo = localStorage.getItem(chave);
   if(!salvo) return;
 
   const dados = JSON.parse(salvo);
-
   const rows = document.querySelectorAll(".acao-row");
-  dados.acoes.forEach((item,i)=>{
-    if(!rows[i]) return;
 
-    rows[i].querySelector(".acao-input").value = item.acao;
-    rows[i].querySelectorAll(".dia").forEach((d,idx)=>{
-      d.className = "dia " + (item.dias[idx] || "");
+  dados.forEach((d,i)=>{
+    if(!rows[i]) return;
+    rows[i].querySelector(".acao-input").value = d.acao;
+    rows[i].querySelectorAll(".dia").forEach((c,j)=>{
+      c.className = "dia " + (d.dias[j]||"");
     });
   });
 }
 
 /* ---------- EVENTOS ---------- */
-document.getElementById("mes").onchange = carregar;
-document.getElementById("ano").onchange = carregar;
+mes.onchange = carregar;
+ano.onchange = carregar;
 
-window.onload = carregar;
+window.onload = montarTabela;
 </script>
-
 
 </body>
 </html>
