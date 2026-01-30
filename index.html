@@ -202,9 +202,11 @@ let celulaAtual = null;
 /* ---------- ANO ---------- */
 const anoSel = document.getElementById("ano");
 const anoAtual = new Date().getFullYear();
-for(let a=anoAtual-2;a<=anoAtual+5;a++){
+
+for(let a=anoAtual; a<=anoAtual+5; a++){
   anoSel.innerHTML += `<option>${a}</option>`;
 }
+
 
 /* ---------- ATIVAR CLIQUE ---------- */
 function ativarDias(contexto=document){
