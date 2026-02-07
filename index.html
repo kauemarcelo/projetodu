@@ -54,9 +54,7 @@ th, td{
   text-align:center;
 }
 
-th{
-  background:#eee;
-}
+th{ background:#eee; }
 
 .categoria{
   background:#ddd;
@@ -100,9 +98,7 @@ th{
 /* MODAL */
 #modal{
   position:fixed;
-  top:0; left:0;
-  width:100%;
-  height:100%;
+  inset:0;
   background:rgba(0,0,0,.5);
   display:none;
   align-items:center;
@@ -159,7 +155,7 @@ th{
 </div>
 
 <div class="container">
-<table>
+<table id="tabela">
 <thead>
 <tr>
   <th>AÇÃO</th>
@@ -192,18 +188,16 @@ const categorias = [
 ];
 
 const corpo = document.getElementById("corpo");
+const tabela = document.getElementById("tabela");
 const modal = document.getElementById("modal");
 let celulaAtual = null;
 
-/* MES / ANO */
+/* MESES / ANOS */
 const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-const mesSel = document.getElementById("mes");
-const anoSel = document.getElementById("ano");
-
-meses.forEach((m,i)=>mesSel.innerHTML+=`<option value="${i}">${m}</option>`);
+meses.forEach((m,i)=>mes.innerHTML+=`<option value="${i}">${m}</option>`);
 
 const anoAtual = new Date().getFullYear();
-for(let a=anoAtual;a<=anoAtual+5;a++) anoSel.innerHTML+=`<option>${a}</option>`;
+for(let a=anoAtual;a<=anoAtual+5;a++) ano.innerHTML+=`<option>${a}</option>`;
 
 /* MONTAR */
 function montar(){
@@ -222,8 +216,8 @@ function montar(){
 
 /* ADD AÇÃO */
 function addAcao(ref){
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
     <td>
       <div class="acao-box">
         <input class="acao-input" placeholder="Digite a ação">
@@ -231,20 +225,18 @@ function addAcao(ref){
       </div>
     </td>
   `;
-
-  for(let i=1;i<=31;i++){
-    const td = document.createElement("td");
-    td.className = "dia";
-    td.addEventListener("click", function(){
-      celulaAtual = this;
-      modal.style.display = "flex";
-    });
-    tr.appendChild(td);
-  }
-
+  for(let i=1;i<=31;i++) tr.innerHTML+=`<td class="dia"></td>`;
   if(ref) ref.closest("tr").after(tr);
   else corpo.appendChild(tr);
 }
+
+/* 🔥 DELEGAÇÃO DE EVENTO (AQUI ESTÁ A SOLUÇÃO) */
+tabela.addEventListener("click", function(e){
+  if(e.target.classList.contains("dia")){
+    celulaAtual = e.target;
+    modal.style.display = "flex";
+  }
+});
 
 /* STATUS */
 function definirStatus(status){
@@ -257,7 +249,7 @@ function definirStatus(status){
 function salvar(){
   const dados=[];
   document.querySelectorAll("#corpo tr").forEach(tr=>{
-    const input = tr.querySelector(".acao-input");
+    const input=tr.querySelector(".acao-input");
     if(!input) return;
     const dias=[];
     tr.querySelectorAll(".dia").forEach(d=>{
@@ -265,7 +257,6 @@ function salvar(){
     });
     dados.push({acao:input.value,dias});
   });
-
   const chave = pessoa.value+"-"+mes.value+"-"+ano.value;
   localStorage.setItem(chave, JSON.stringify(dados));
   alert("Salvo com sucesso ✅");
@@ -278,10 +269,9 @@ function carregar(){
   const dados = JSON.parse(localStorage.getItem(chave) || "[]");
 
   const inputs = document.querySelectorAll(".acao-input");
-
   dados.forEach((d,i)=>{
     if(!inputs[i]) return;
-    inputs[i].value = d.acao;
+    inputs[i].value=d.acao;
     const dias = inputs[i].closest("tr").querySelectorAll(".dia");
     d.dias.forEach((st,j)=>{
       if(st) dias[j].classList.add(st);
@@ -290,8 +280,8 @@ function carregar(){
 }
 
 pessoa.onchange = carregar;
-mesSel.onchange = carregar;
-anoSel.onchange = carregar;
+mes.onchange = carregar;
+ano.onchange = carregar;
 
 montar();
 carregar();
