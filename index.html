@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Horário Espiritual</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
@@ -19,6 +20,7 @@ body{
   font-weight:bold;
 }
 
+/* TOPO */
 .topo{
   background:#fff;
   margin:10px;
@@ -30,21 +32,24 @@ body{
 }
 
 .topo select, .topo button{
-  padding:8px;
-  font-size:15px;
+  padding:10px;
+  font-size:16px;
 }
 
+/* CONTAINER */
 .container{
   background:#fff;
   margin:10px;
   padding:10px;
   border-radius:6px;
   overflow-x:auto;
+  -webkit-overflow-scrolling: touch;
 }
 
+/* TABELA */
 table{
   border-collapse:collapse;
-  width:100%;
+  min-width:900px; /* 🔥 garante rolagem no mobile */
 }
 
 th, td{
@@ -73,6 +78,7 @@ th{ background:#eee; }
   background:transparent;
   width:100%;
   font-weight:bold;
+  font-size:14px;
 }
 
 .add, .del{
@@ -83,9 +89,10 @@ th{ background:#eee; }
 .add{ color:#2b55ff; }
 .del{ color:#d32f2f; }
 
+/* CÉLULAS */
 .dia{
-  width:26px;
-  height:26px;
+  width:28px;
+  height:28px;
   background:#f0f0f0;
   cursor:pointer;
 }
@@ -109,30 +116,41 @@ th{ background:#eee; }
 .modal-box{
   background:#fff;
   padding:20px;
-  border-radius:8px;
-  width:260px;
+  border-radius:10px;
+  width:90%;
+  max-width:320px;
   text-align:center;
 }
 
 .modal-box button{
   width:100%;
-  padding:10px;
-  margin:6px 0;
+  padding:14px;
+  margin:8px 0;
   border:none;
-  font-size:15px;
+  font-size:16px;
   cursor:pointer;
-  border-radius:4px;
+  border-radius:6px;
   color:#fff;
 }
 
+/* 📱 MOBILE */
 @media(max-width:768px){
   .topo{
     flex-direction:column;
   }
-  table{
-    display:block;
-    overflow-x:auto;
-    white-space:nowrap;
+
+  .topo select,
+  .topo button{
+    width:100%;
+  }
+
+  th, td{
+    font-size:13px;
+  }
+
+  .dia{
+    width:32px;
+    height:32px;
   }
 }
 </style>
@@ -230,8 +248,8 @@ function addAcao(ref){
   else corpo.appendChild(tr);
 }
 
-/* 🔥 DELEGAÇÃO DE EVENTO (AQUI ESTÁ A SOLUÇÃO) */
-tabela.addEventListener("click", function(e){
+/* DELEGAÇÃO DE EVENTO */
+tabela.addEventListener("click", e=>{
   if(e.target.classList.contains("dia")){
     celulaAtual = e.target;
     modal.style.display = "flex";
