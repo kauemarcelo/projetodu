@@ -2,89 +2,157 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Planilha Mensal</title>
+<title>Horário Espiritual</title>
 
 <style>
 body{
-  font-family: Arial, sans-serif;
-   background:url("igreja.jpg") center/cover no-repeat fixed;
-  padding:20px;
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#1e1e2f;
+}
+
+.header{
+  background:rgba(255,255,255,0.9);
+  padding:12px;
+  text-align:center;
+  font-size:20px;
+  font-weight:bold;
 }
 
 .topo{
+  background:#fff;
+  margin:10px;
+  padding:10px;
+  border-radius:6px;
   display:flex;
+  flex-wrap:wrap;
   gap:10px;
-  margin-bottom:15px;
   align-items:center;
+  justify-content:space-between;
 }
 
-button{
-  padding:6px 10px;
-  cursor:pointer;
+.topo select,
+.topo button{
+  padding:6px;
+  font-size:14px;
+}
+
+.container{
+  background:#fff;
+  margin:10px;
+  padding:10px;
+  border-radius:6px;
+  overflow-x:auto;
 }
 
 table{
   border-collapse:collapse;
   width:100%;
-  background:#fff;
 }
 
-th, td{
-  border:1px solid #ccc;
+th,td{
+  border:1px solid #999;
+  padding:4px;
+  font-size:12px;
   text-align:center;
-  padding:6px;
 }
 
-th{
-  background:#eee;
+th{ background:#eee; }
+
+.categoria{
+  background:#ddd;
+  font-weight:bold;
+  text-align:left;
+  padding-left:8px;
 }
 
 .acao-box{
   display:flex;
-  gap:5px;
   align-items:center;
+  gap:5px;
 }
 
 .acao-input{
-  width:100%;
-  padding:4px;
-}
-
-.remover{
-  background:#f44336;
-  color:#fff;
+  flex:1;
   border:none;
+  background:transparent;
+  font-weight:bold;
 }
 
-.feito{
-  background:#4CAF50;
-  color:#fff;
+.btn{
+  cursor:pointer;
+  font-weight:bold;
 }
 
-.parcial{
-  background:#FFC107;
+.add{ color:#2a5cff; }
+.del{ color:#e53935; }
+
+.dia{
+  width:26px;
+  height:26px;
+  cursor:pointer;
+  background:#f0f0f0;
 }
 
-.nao{
-  background:#F44336;
-  color:#fff;
+.verde{ background:#4CAF50; }
+.amarelo{ background:#FFC107; }
+.vermelho{ background:#F44336; }
+
+/* MODAL */
+.modal{
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
 }
 
 .status-box{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%, -50%);
   background:#fff;
-  border:1px solid #ccc;
   padding:15px;
-  display:none;
-  z-index:10;
+  border-radius:8px;
+  text-align:center;
+  width:260px;
+}
+
+.status-box button{
+  width:100%;
+  padding:8px;
+  margin:6px 0;
+  font-size:15px;
+  cursor:pointer;
+  border:none;
+  border-radius:4px;
+  color:#fff;
+}
+
+/* MOBILE */
+@media (max-width:768px){
+  .topo{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .topo select,
+  .topo button{
+    width:100%;
+    font-size:16px;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
 }
 </style>
 </head>
 
 <body>
+
+<div class="header">HORÁRIO ESPIRITUAL</div>
 
 <div class="topo">
   <select id="pessoa">
@@ -95,142 +163,149 @@ th{
   <select id="mes"></select>
   <select id="ano"></select>
 
-  <button onclick="adicionarLinha()">➕ Ação</button>
   <button onclick="salvar()">💾 Salvar</button>
 </div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Ação</th>
-      <script>
-        for(let i=1;i<=31;i++){
-          document.write(`<th>${i}</th>`);
-        }
-      </script>
-    </tr>
-  </thead>
-  <tbody id="corpo"></tbody>
-</table>
+<div class="container">
+<table id="tabela">
 
-<div class="status-box" id="statusBox">
-  <p>Escolha o status:</p>
-  <button onclick="setStatus('feito')">Feito</button>
-  <button onclick="setStatus('parcial')">Parcial</button>
-  <button onclick="setStatus('nao')">Não concluído</button>
-  <br><br>
-  <button onclick="fecharBox()">Cancelar</button>
+<thead>
+<tr>
+  <th>AÇÃO</th>
+  <script>
+    for(let i=1;i<=31;i++) document.write(`<th>${i}</th>`);
+  </script>
+</tr>
+</thead>
+
+<tbody id="corpo"></tbody>
+
+</table>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="status-box">
+    <h3>Status</h3>
+    <button style="background:#4CAF50" onclick="setStatus('verde')">Feito</button>
+    <button style="background:#FFC107" onclick="setStatus('amarelo')">Parcial</button>
+    <button style="background:#F44336" onclick="setStatus('vermelho')">Não concluído</button>
+    <button style="background:#777" onclick="setStatus('')">Limpar</button>
+  </div>
 </div>
 
 <script>
+const categorias = [
+  "Vinculação comigo mesmo",
+  "Vinculação com Deus",
+  "Vinculação com os outros",
+  "Vinculação com o trabalho"
+];
+
 const corpo = document.getElementById("corpo");
-const pessoaSel = document.getElementById("pessoa");
+let celulaAtual = null;
+
+/* MES / ANO */
+const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const mesSel = document.getElementById("mes");
 const anoSel = document.getElementById("ano");
 
-let celulaAtual = null;
+meses.forEach((m,i)=> mesSel.innerHTML += `<option value="${i}">${m}</option>`);
 
-// meses
-const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-meses.forEach((m,i)=>mesSel.innerHTML+=`<option value="${i}">${m}</option>`);
-
-// anos a partir do atual
 const anoAtual = new Date().getFullYear();
-for(let a=anoAtual; a<=anoAtual+5; a++){
-  anoSel.innerHTML+=`<option value="${a}">${a}</option>`;
+for(let a=anoAtual;a<=anoAtual+5;a++) anoSel.innerHTML += `<option>${a}</option>`;
+
+/* CRIAR TABELA */
+function montar(){
+  corpo.innerHTML="";
+  categorias.forEach(cat=>{
+    corpo.innerHTML+=`
+      <tr>
+        <td class="categoria" colspan="32">
+          ${cat}
+          <span class="btn add" onclick="addAcao(this)"> +</span>
+        </td>
+      </tr>
+    `;
+    addAcao();
+  });
 }
 
-function chave(){
-  return `${pessoaSel.value}_${mesSel.value}_${anoSel.value}`;
-}
-
-function adicionarLinha(dados=null){
-  let tr = document.createElement("tr");
-
-  let tdAcao = document.createElement("td");
-  let box = document.createElement("div");
-  box.className="acao-box";
-
-  let input = document.createElement("input");
-  input.className="acao-input";
-  input.placeholder="Digite a ação";
-
-  let btnRemover = document.createElement("button");
-  btnRemover.innerText="X";
-  btnRemover.className="remover";
-  btnRemover.onclick=()=>{
-    tr.remove();
-    salvar();
-  };
-
-  box.appendChild(input);
-  box.appendChild(btnRemover);
-  tdAcao.appendChild(box);
-  tr.appendChild(tdAcao);
-
-  for(let i=0;i<31;i++){
-    let td = document.createElement("td");
-    td.onclick=()=>abrirBox(td);
+function addAcao(btn){
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
+    <td>
+      <div class="acao-box">
+        <input class="acao-input" placeholder="Digite a ação">
+        <span class="btn del" onclick="this.closest('tr').remove()">✖</span>
+      </div>
+    </td>
+  `;
+  for(let i=1;i<=31;i++){
+    const td=document.createElement("td");
+    td.className="dia";
+    td.onclick=()=>abrirModal(td);
     tr.appendChild(td);
   }
-
-  corpo.appendChild(tr);
-
-  if(dados){
-    input.value = dados.acao;
-    tr.querySelectorAll("td:not(:first-child)").forEach((td,i)=>{
-      td.className = dados.dias[i];
-    });
-  }
+  if(btn) btn.closest("tr").after(tr);
+  else corpo.appendChild(tr);
 }
 
-function abrirBox(td){
-  celulaAtual = td;
-  document.getElementById("statusBox").style.display="block";
+/* MODAL */
+function abrirModal(td){
+  celulaAtual=td;
+  document.getElementById("modal").style.display="flex";
 }
 
-function fecharBox(){
-  document.getElementById("statusBox").style.display="none";
+function setStatus(st){
+  celulaAtual.className="dia "+st;
+  document.getElementById("modal").style.display="none";
 }
 
-function setStatus(status){
-  celulaAtual.className = status;
-  fecharBox();
-}
-
+/* SALVAR */
 function salvar(){
-  let dados=[];
-  document.querySelectorAll("#corpo tr").forEach(tr=>{
-    let linha={
-      acao: tr.querySelector("input").value,
-      dias:[]
-    };
-    tr.querySelectorAll("td:not(:first-child)").forEach(td=>{
-      linha.dias.push(td.className||"");
+  const dados=[];
+  document.querySelectorAll(".acao-row, tbody tr").forEach(tr=>{
+    const input=tr.querySelector(".acao-input");
+    if(!input) return;
+    const dias=[];
+    tr.querySelectorAll(".dia").forEach(d=>{
+      dias.push(d.className.replace("dia","").trim());
     });
-    dados.push(linha);
+    dados.push({acao:input.value,dias});
   });
-  localStorage.setItem(chave(), JSON.stringify(dados));
-  alert("Salvo com sucesso!");
+
+  const chave = pessoa.value+"-"+mes.value+"-"+ano.value;
+  localStorage.setItem(chave, JSON.stringify(dados));
+  alert("Salvo com sucesso ✅");
 }
 
+/* CARREGAR */
 function carregar(){
-  corpo.innerHTML="";
-  let dados = JSON.parse(localStorage.getItem(chave()));
-  if(dados){
-    dados.forEach(l=>adicionarLinha(l));
-  }else{
-    adicionarLinha();
-  }
+  montar();
+  const chave = pessoa.value+"-"+mes.value+"-"+ano.value;
+  const dados = JSON.parse(localStorage.getItem(chave) || "[]");
+  const linhas=document.querySelectorAll(".acao-input");
+
+  dados.forEach((d,i)=>{
+    if(!linhas[i]) return;
+    linhas[i].value=d.acao;
+    const dias=linhas[i].closest("tr").querySelectorAll(".dia");
+    d.dias.forEach((st,j)=>{
+      if(st) dias[j].classList.add(st);
+    });
+  });
 }
 
-pessoaSel.onchange=carregar;
-mesSel.onchange=carregar;
-anoSel.onchange=carregar;
+["change"].forEach(e=>{
+  pessoa.addEventListener(e,carregar);
+  mesSel.addEventListener(e,carregar);
+  anoSel.addEventListener(e,carregar);
+});
 
+montar();
 carregar();
 </script>
 
 </body>
 </html>
-
