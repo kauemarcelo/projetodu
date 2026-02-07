@@ -2,156 +2,149 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Horário Espiritual</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horário Espiritual</title>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#f2f2f2;
+* { box-sizing: border-box; font-family: Arial, sans-serif; }
+
+body {
+  margin: 0;
+  background: #f2f2f2;
 }
 
-.header{
-  background:#fff;
-  padding:12px;
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
+.header {
+  background: #fff;
+  padding: 12px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
 }
 
-/* TOPO */
-.topo{
-  background:#fff;
-  margin:10px;
-  padding:10px;
-  border-radius:6px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
+.controls {
+  background: #fff;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 8px;
 }
 
-.topo select, .topo button{
-  padding:10px;
-  font-size:16px;
+.controls select, .controls button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  font-size: 16px;
 }
 
-/* CONTAINER */
-.container{
-  background:#fff;
-  margin:10px;
-  padding:10px;
-  border-radius:6px;
-  overflow-x:auto;
-  -webkit-overflow-scrolling: touch;
+.container {
+  background: #fff;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
 }
 
-/* TABELA */
-table{
-  border-collapse:collapse;
-  min-width:900px; /* 🔥 garante rolagem no mobile */
+table {
+  border-collapse: collapse;
+  width: max-content;
 }
 
-th, td{
-  border:1px solid #aaa;
-  padding:4px;
-  font-size:12px;
-  text-align:center;
+th, td {
+  border: 1px solid #ccc;
+  padding: 4px;
+  text-align: center;
+  font-size: 13px;
 }
 
-th{ background:#eee; }
-
-.categoria{
-  background:#ddd;
-  font-weight:bold;
-  text-align:left;
+th {
+  background: #eee;
 }
 
-.acao-box{
-  display:flex;
-  align-items:center;
-  gap:6px;
+.categoria {
+  background: #ddd;
+  font-weight: bold;
+  text-align: left;
+  padding-left: 8px;
 }
 
-.acao-input{
-  border:none;
-  background:transparent;
-  width:100%;
-  font-weight:bold;
-  font-size:14px;
+.acao-cell {
+  min-width: 160px;
 }
 
-.add, .del{
-  cursor:pointer;
-  font-weight:bold;
+.acao-input {
+  width: 100%;
+  border: none;
+  font-weight: bold;
+  font-size: 14px;
 }
 
-.add{ color:#2b55ff; }
-.del{ color:#d32f2f; }
-
-/* CÉLULAS */
-.dia{
-  width:28px;
-  height:28px;
-  background:#f0f0f0;
-  cursor:pointer;
+.btn {
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 6px;
 }
 
-/* STATUS */
-.verde{ background:#4CAF50 !important; }
-.amarelo{ background:#FFC107 !important; }
-.vermelho{ background:#F44336 !important; }
+.btn.add { color: #2f5cff; }
+.btn.del { color: #e53935; }
+
+.dia {
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  background: #f0f0f0;
+}
+
+.feito { background: #4CAF50 !important; }
+.parcial { background: #FFC107 !important; }
+.nao { background: #F44336 !important; }
+
+/* MOBILE */
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 3;
+  }
+
+  .categoria {
+    position: sticky;
+    left: 0;
+    z-index: 4;
+  }
+}
 
 /* MODAL */
-#modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
 }
 
-.modal-box{
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  width:90%;
-  max-width:320px;
-  text-align:center;
+.modal-box {
+  background: #fff;
+  padding: 16px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 320px;
+  text-align: center;
 }
 
-.modal-box button{
-  width:100%;
-  padding:14px;
-  margin:8px 0;
-  border:none;
-  font-size:16px;
-  cursor:pointer;
-  border-radius:6px;
-  color:#fff;
-}
-
-/* 📱 MOBILE */
-@media(max-width:768px){
-  .topo{
-    flex-direction:column;
-  }
-
-  .topo select,
-  .topo button{
-    width:100%;
-  }
-
-  th, td{
-    font-size:13px;
-  }
-
-  .dia{
-    width:32px;
-    height:32px;
-  }
+.modal-box button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  font-size: 16px;
+  cursor: pointer;
 }
 </style>
 </head>
@@ -160,13 +153,19 @@ th{ background:#eee; }
 
 <div class="header">HORÁRIO ESPIRITUAL</div>
 
-<div class="topo">
+<div class="controls">
   <select id="pessoa">
     <option>Eduardo</option>
     <option>Alessandra</option>
   </select>
 
-  <select id="mes"></select>
+  <select id="mes">
+    <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
+    <option>Abril</option><option>Maio</option><option>Junho</option>
+    <option>Julho</option><option>Agosto</option><option>Setembro</option>
+    <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
+  </select>
+
   <select id="ano"></select>
 
   <button onclick="salvar()">💾 Salvar</button>
@@ -182,18 +181,18 @@ th{ background:#eee; }
   </script>
 </tr>
 </thead>
-<tbody id="corpo"></tbody>
+<tbody id="tbody"></tbody>
 </table>
 </div>
 
 <!-- MODAL -->
-<div id="modal">
+<div class="modal" id="modal">
   <div class="modal-box">
-    <h3>Status do dia</h3>
-    <button style="background:#4CAF50" onclick="definirStatus('verde')">Feito</button>
-    <button style="background:#FFC107;color:#000" onclick="definirStatus('amarelo')">Parcial</button>
-    <button style="background:#F44336" onclick="definirStatus('vermelho')">Não concluído</button>
-    <button style="background:#777" onclick="definirStatus('')">Limpar</button>
+    <p>Status do dia</p>
+    <button onclick="setStatus('feito')" style="background:#4CAF50;color:#fff">Feito</button>
+    <button onclick="setStatus('parcial')" style="background:#FFC107">Parcial</button>
+    <button onclick="setStatus('nao')" style="background:#F44336;color:#fff">Não concluído</button>
+    <button onclick="setStatus('')">Limpar</button>
   </div>
 </div>
 
@@ -205,104 +204,77 @@ const categorias = [
   "Vinculação com o trabalho"
 ];
 
-const corpo = document.getElementById("corpo");
-const tabela = document.getElementById("tabela");
-const modal = document.getElementById("modal");
+const tbody = document.getElementById("tbody");
 let celulaAtual = null;
 
-/* MESES / ANOS */
-const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-meses.forEach((m,i)=>mes.innerHTML+=`<option value="${i}">${m}</option>`);
-
-const anoAtual = new Date().getFullYear();
-for(let a=anoAtual;a<=anoAtual+5;a++) ano.innerHTML+=`<option>${a}</option>`;
-
-/* MONTAR */
-function montar(){
-  corpo.innerHTML="";
+function montarTabela(){
+  tbody.innerHTML = "";
   categorias.forEach(cat=>{
-    corpo.innerHTML+=`
+    tbody.innerHTML += `
       <tr>
         <td class="categoria" colspan="32">
-          ${cat} <span class="add" onclick="addAcao(this)"> +</span>
+          ${cat}
+          <span class="btn add" onclick="addAcao(this)">+</span>
         </td>
       </tr>
+      ${linhaAcao()}
     `;
-    addAcao();
+  });
+  aplicarClique();
+}
+
+function linhaAcao(){
+  let html = `<tr>
+    <td class="acao-cell">
+      <input class="acao-input" placeholder="Digite a ação">
+      <span class="btn del" onclick="this.closest('tr').remove()">✖</span>
+    </td>`;
+  for(let i=1;i<=31;i++) html += `<td class="dia"></td>`;
+  return html + "</tr>";
+}
+
+function addAcao(btn){
+  btn.closest("tr").insertAdjacentHTML("afterend", linhaAcao());
+  aplicarClique();
+}
+
+function aplicarClique(){
+  document.querySelectorAll(".dia").forEach(c=>{
+    c.onclick = ()=>{
+      celulaAtual = c;
+      document.getElementById("modal").style.display = "flex";
+    };
   });
 }
 
-/* ADD AÇÃO */
-function addAcao(ref){
-  const tr=document.createElement("tr");
-  tr.innerHTML=`
-    <td>
-      <div class="acao-box">
-        <input class="acao-input" placeholder="Digite a ação">
-        <span class="del" onclick="this.closest('tr').remove()">✖</span>
-      </div>
-    </td>
-  `;
-  for(let i=1;i<=31;i++) tr.innerHTML+=`<td class="dia"></td>`;
-  if(ref) ref.closest("tr").after(tr);
-  else corpo.appendChild(tr);
-}
-
-/* DELEGAÇÃO DE EVENTO */
-tabela.addEventListener("click", e=>{
-  if(e.target.classList.contains("dia")){
-    celulaAtual = e.target;
-    modal.style.display = "flex";
-  }
-});
-
-/* STATUS */
-function definirStatus(status){
-  if(!celulaAtual) return;
+function setStatus(status){
   celulaAtual.className = "dia " + status;
-  modal.style.display = "none";
+  document.getElementById("modal").style.display = "none";
 }
 
-/* SALVAR */
 function salvar(){
-  const dados=[];
-  document.querySelectorAll("#corpo tr").forEach(tr=>{
-    const input=tr.querySelector(".acao-input");
-    if(!input) return;
-    const dias=[];
-    tr.querySelectorAll(".dia").forEach(d=>{
-      dias.push(d.className.replace("dia","").trim());
-    });
-    dados.push({acao:input.value,dias});
-  });
-  const chave = pessoa.value+"-"+mes.value+"-"+ano.value;
-  localStorage.setItem(chave, JSON.stringify(dados));
-  alert("Salvo com sucesso ✅");
+  const key = pessoa.value + mes.value + ano.value;
+  localStorage.setItem(key, tbody.innerHTML);
+  alert("Salvo com sucesso!");
 }
 
-/* CARREGAR */
 function carregar(){
-  montar();
-  const chave = pessoa.value+"-"+mes.value+"-"+ano.value;
-  const dados = JSON.parse(localStorage.getItem(chave) || "[]");
-
-  const inputs = document.querySelectorAll(".acao-input");
-  dados.forEach((d,i)=>{
-    if(!inputs[i]) return;
-    inputs[i].value=d.acao;
-    const dias = inputs[i].closest("tr").querySelectorAll(".dia");
-    d.dias.forEach((st,j)=>{
-      if(st) dias[j].classList.add(st);
-    });
-  });
+  const key = pessoa.value + mes.value + ano.value;
+  const dados = localStorage.getItem(key);
+  if(dados){
+    tbody.innerHTML = dados;
+    aplicarClique();
+  } else montarTabela();
 }
 
-pessoa.onchange = carregar;
-mes.onchange = carregar;
-ano.onchange = carregar;
+/* ano */
+const anoSel = document.getElementById("ano");
+const atual = new Date().getFullYear();
+for(let a=atual;a<=atual+5;a++) anoSel.innerHTML += `<option>${a}</option>`;
 
-montar();
-carregar();
+pessoa.onchange = mes.onchange = ano.onchange = carregar;
+
+montarTabela();
 </script>
 
 </body>
