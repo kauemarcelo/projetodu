@@ -1,1 +1,213 @@
 
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Planilha Mensal</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f4f4;
+  padding:20px;
+}
+
+.topo{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+select{
+  padding:6px;
+}
+
+table{
+  border-collapse:collapse;
+  width:100%;
+  background:#fff;
+}
+
+th, td{
+  border:1px solid #ccc;
+  text-align:center;
+  padding:6px;
+  cursor:pointer;
+}
+
+th{
+  background:#eee;
+}
+
+.acao-input{
+  width:100%;
+  padding:4px;
+}
+
+.feito{
+  background:#4CAF50;
+  color:#fff;
+}
+
+.parcial{
+  background:#FFC107;
+}
+
+.nao{
+  background:#F44336;
+  color:#fff;
+}
+
+.status-box{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  background:#fff;
+  border:1px solid #ccc;
+  padding:15px;
+  display:none;
+  z-index:10;
+}
+
+.status-box button{
+  margin:5px;
+  padding:8px 12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topo">
+  <select id="pessoa">
+    <option value="Eduardo">Eduardo</option>
+    <option value="Alessandra">Alessandra</option>
+  </select>
+
+  <select id="mes"></select>
+  <select id="ano"></select>
+</div>
+
+<table id="tabela">
+  <thead>
+    <tr>
+      <th>Ação / Dia</th>
+      <script>
+        for(let i=1;i<=31;i++){
+          document.write(`<th>${i}</th>`);
+        }
+      </script>
+    </tr>
+  </thead>
+  <tbody id="corpo"></tbody>
+</table>
+
+<div class="status-box" id="statusBox">
+  <p>Escolha o status:</p>
+  <button onclick="setStatus('feito')">Feito</button>
+  <button onclick="setStatus('parcial')">Parcial</button>
+  <button onclick="setStatus('nao')">Não concluído</button>
+  <br>
+  <button onclick="fecharBox()">Cancelar</button>
+</div>
+
+<script>
+const corpo = document.getElementById("corpo");
+const pessoaSel = document.getElementById("pessoa");
+const mesSel = document.getElementById("mes");
+const anoSel = document.getElementById("ano");
+
+let celulaAtual = null;
+
+// meses
+const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+meses.forEach((m,i)=>{
+  mesSel.innerHTML += `<option value="${i}">${m}</option>`;
+});
+
+// anos (a partir do atual)
+const anoAtual = new Date().getFullYear();
+for(let a=anoAtual; a<=anoAtual+5; a++){
+  anoSel.innerHTML += `<option value="${a}">${a}</option>`;
+}
+
+function chave(){
+  return `${pessoaSel.value}_${mesSel.value}_${anoSel.value}`;
+}
+
+function criarTabela(){
+  corpo.innerHTML = "";
+  for(let l=0;l<3;l++){
+    let tr = document.createElement("tr");
+    let tdAcao = document.createElement("td");
+    let input = document.createElement("input");
+    input.className="acao-input";
+    input.placeholder="Digite a ação";
+    input.onchange = salvar;
+    tdAcao.appendChild(input);
+    tr.appendChild(tdAcao);
+
+    for(let d=1; d<=31; d++){
+      let td = document.createElement("td");
+      td.onclick = ()=>abrirBox(td);
+      tr.appendChild(td);
+    }
+    corpo.appendChild(tr);
+  }
+  carregar();
+}
+
+function abrirBox(td){
+  celulaAtual = td;
+  document.getElementById("statusBox").style.display="block";
+}
+
+function fecharBox(){
+  document.getElementById("statusBox").style.display="none";
+}
+
+function setStatus(status){
+  celulaAtual.className = "";
+  celulaAtual.classList.add(status);
+  fecharBox();
+  salvar();
+}
+
+function salvar(){
+  let dados = [];
+  document.querySelectorAll("#corpo tr").forEach(tr=>{
+    let linha = {
+      acao: tr.querySelector("input").value,
+      dias: []
+    };
+    tr.querySelectorAll("td:not(:first-child)").forEach(td=>{
+      linha.dias.push(td.className || "");
+    });
+    dados.push(linha);
+  });
+  localStorage.setItem(chave(), JSON.stringify(dados));
+}
+
+function carregar(){
+  let dados = JSON.parse(localStorage.getItem(chave()));
+  if(!dados) return;
+
+  document.querySelectorAll("#corpo tr").forEach((tr,i)=>{
+    tr.querySelector("input").value = dados[i].acao;
+    tr.querySelectorAll("td:not(:first-child)").forEach((td,d)=>{
+      td.className = dados[i].dias[d];
+    });
+  });
+}
+
+pessoaSel.onchange = criarTabela;
+mesSel.onchange = criarTabela;
+anoSel.onchange = criarTabela;
+
+criarTabela();
+</script>
+
+</body>
+</html>
