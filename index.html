@@ -12,7 +12,7 @@ body{
 }
 
 .header{
-  background:rgba(255,255,255,0.9);
+  background:#f5f5f5;
   padding:12px;
   text-align:center;
   font-size:20px;
@@ -27,14 +27,10 @@ body{
   display:flex;
   flex-wrap:wrap;
   gap:10px;
-  align-items:center;
-  justify-content:space-between;
 }
 
-.topo select,
-.topo button{
-  padding:6px;
-  font-size:14px;
+.topo select, .topo button{
+  padding:8px;
 }
 
 .container{
@@ -63,35 +59,29 @@ th{ background:#eee; }
   background:#ddd;
   font-weight:bold;
   text-align:left;
-  padding-left:8px;
 }
 
 .acao-box{
   display:flex;
   align-items:center;
-  gap:5px;
+  gap:6px;
 }
 
 .acao-input{
-  flex:1;
   border:none;
   background:transparent;
   font-weight:bold;
+  width:100%;
 }
 
-.btn{
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.add{ color:#2a5cff; }
-.del{ color:#e53935; }
+.add{ color:#2a5cff; cursor:pointer; }
+.del{ color:#e53935; cursor:pointer; }
 
 .dia{
   width:26px;
   height:26px;
-  cursor:pointer;
   background:#f0f0f0;
+  cursor:pointer;
 }
 
 .verde{ background:#4CAF50; }
@@ -101,9 +91,8 @@ th{ background:#eee; }
 /* MODAL */
 .modal{
   position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.5);
+  inset:0;
+  background:rgba(0,0,0,.5);
   display:none;
   align-items:center;
   justify-content:center;
@@ -113,18 +102,18 @@ th{ background:#eee; }
   background:#fff;
   padding:15px;
   border-radius:8px;
-  text-align:center;
   width:260px;
+  text-align:center;
 }
 
 .status-box button{
   width:100%;
-  padding:8px;
+  padding:10px;
   margin:6px 0;
-  font-size:15px;
-  cursor:pointer;
   border:none;
   border-radius:4px;
+  font-size:15px;
+  cursor:pointer;
   color:#fff;
 }
 
@@ -132,15 +121,7 @@ th{ background:#eee; }
 @media (max-width:768px){
   .topo{
     flex-direction:column;
-    align-items:stretch;
   }
-
-  .topo select,
-  .topo button{
-    width:100%;
-    font-size:16px;
-  }
-
   table{
     display:block;
     overflow-x:auto;
@@ -156,8 +137,8 @@ th{ background:#eee; }
 
 <div class="topo">
   <select id="pessoa">
-    <option value="Eduardo">Eduardo</option>
-    <option value="Alessandra">Alessandra</option>
+    <option>Eduardo</option>
+    <option>Alessandra</option>
   </select>
 
   <select id="mes"></select>
@@ -167,8 +148,7 @@ th{ background:#eee; }
 </div>
 
 <div class="container">
-<table id="tabela">
-
+<table>
 <thead>
 <tr>
   <th>AÇÃO</th>
@@ -177,9 +157,7 @@ th{ background:#eee; }
   </script>
 </tr>
 </thead>
-
 <tbody id="corpo"></tbody>
-
 </table>
 </div>
 
@@ -187,10 +165,10 @@ th{ background:#eee; }
 <div class="modal" id="modal">
   <div class="status-box">
     <h3>Status</h3>
-    <button style="background:#4CAF50" onclick="setStatus('verde')">Feito</button>
-    <button style="background:#FFC107" onclick="setStatus('amarelo')">Parcial</button>
-    <button style="background:#F44336" onclick="setStatus('vermelho')">Não concluído</button>
-    <button style="background:#777" onclick="setStatus('')">Limpar</button>
+    <button style="background:#4CAF50" onclick="definirStatus('verde')">Feito</button>
+    <button style="background:#FFC107;color:#000" onclick="definirStatus('amarelo')">Parcial</button>
+    <button style="background:#F44336" onclick="definirStatus('vermelho')">Não concluído</button>
+    <button style="background:#777" onclick="definirStatus('')">Limpar</button>
   </div>
 </div>
 
@@ -203,6 +181,7 @@ const categorias = [
 ];
 
 const corpo = document.getElementById("corpo");
+const modal = document.getElementById("modal");
 let celulaAtual = null;
 
 /* MES / ANO */
@@ -210,20 +189,19 @@ const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Ag
 const mesSel = document.getElementById("mes");
 const anoSel = document.getElementById("ano");
 
-meses.forEach((m,i)=> mesSel.innerHTML += `<option value="${i}">${m}</option>`);
+meses.forEach((m,i)=>mesSel.innerHTML+=`<option value="${i}">${m}</option>`);
 
 const anoAtual = new Date().getFullYear();
-for(let a=anoAtual;a<=anoAtual+5;a++) anoSel.innerHTML += `<option>${a}</option>`;
+for(let a=anoAtual;a<=anoAtual+5;a++) anoSel.innerHTML+=`<option>${a}</option>`;
 
-/* CRIAR TABELA */
+/* MONTAR */
 function montar(){
   corpo.innerHTML="";
   categorias.forEach(cat=>{
     corpo.innerHTML+=`
       <tr>
         <td class="categoria" colspan="32">
-          ${cat}
-          <span class="btn add" onclick="addAcao(this)"> +</span>
+          ${cat} <span class="add" onclick="addAcao(this)"> +</span>
         </td>
       </tr>
     `;
@@ -231,41 +209,42 @@ function montar(){
   });
 }
 
-function addAcao(btn){
+function addAcao(ref){
   const tr=document.createElement("tr");
   tr.innerHTML=`
     <td>
       <div class="acao-box">
         <input class="acao-input" placeholder="Digite a ação">
-        <span class="btn del" onclick="this.closest('tr').remove()">✖</span>
+        <span class="del" onclick="this.closest('tr').remove()">✖</span>
       </div>
     </td>
   `;
   for(let i=1;i<=31;i++){
     const td=document.createElement("td");
     td.className="dia";
-    td.onclick=()=>abrirModal(td);
+    td.addEventListener("click",()=>abrirModal(td));
     tr.appendChild(td);
   }
-  if(btn) btn.closest("tr").after(tr);
+  if(ref) ref.closest("tr").after(tr);
   else corpo.appendChild(tr);
 }
 
 /* MODAL */
 function abrirModal(td){
-  celulaAtual=td;
-  document.getElementById("modal").style.display="flex";
+  celulaAtual = td;
+  modal.style.display="flex";
 }
 
-function setStatus(st){
-  celulaAtual.className="dia "+st;
-  document.getElementById("modal").style.display="none";
+function definirStatus(status){
+  if(!celulaAtual) return;
+  celulaAtual.className = "dia " + status;
+  modal.style.display="none";
 }
 
 /* SALVAR */
 function salvar(){
   const dados=[];
-  document.querySelectorAll(".acao-row, tbody tr").forEach(tr=>{
+  document.querySelectorAll("tbody tr").forEach(tr=>{
     const input=tr.querySelector(".acao-input");
     if(!input) return;
     const dias=[];
@@ -274,9 +253,8 @@ function salvar(){
     });
     dados.push({acao:input.value,dias});
   });
-
   const chave = pessoa.value+"-"+mes.value+"-"+ano.value;
-  localStorage.setItem(chave, JSON.stringify(dados));
+  localStorage.setItem(chave,JSON.stringify(dados));
   alert("Salvo com sucesso ✅");
 }
 
@@ -284,13 +262,13 @@ function salvar(){
 function carregar(){
   montar();
   const chave = pessoa.value+"-"+mes.value+"-"+ano.value;
-  const dados = JSON.parse(localStorage.getItem(chave) || "[]");
-  const linhas=document.querySelectorAll(".acao-input");
+  const dados = JSON.parse(localStorage.getItem(chave)||"[]");
+  const linhas = document.querySelectorAll(".acao-input");
 
   dados.forEach((d,i)=>{
     if(!linhas[i]) return;
     linhas[i].value=d.acao;
-    const dias=linhas[i].closest("tr").querySelectorAll(".dia");
+    const dias = linhas[i].closest("tr").querySelectorAll(".dia");
     d.dias.forEach((st,j)=>{
       if(st) dias[j].classList.add(st);
     });
