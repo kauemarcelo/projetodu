@@ -10,8 +10,41 @@
 
 body {
   margin: 0;
-  background:url("igreja.jpg") center/cover no-repeat fixed;
+  background: #f4f4f4;
 }
+
+/* LOGIN */
+.login {
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.login-box {
+  background:#fff;
+  padding:30px;
+  border-radius:10px;
+  width:300px;
+  text-align:center;
+  box-shadow:0 0 15px rgba(0,0,0,0.2);
+}
+
+.login-box input {
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+}
+
+.login-box button {
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  cursor:pointer;
+}
+
+/* SISTEMA */
+.sistema { display:none; }
 
 .header {
   background: #fff;
@@ -19,6 +52,10 @@ body {
   text-align: center;
   font-weight: bold;
   font-size: 20px;
+}
+
+.header button {
+  margin-left:8px;
 }
 
 .controls {
@@ -55,10 +92,6 @@ th, td {
   font-size: 13px;
 }
 
-th {
-  background: #eee;
-}
-
 .categoria {
   background: #ddd;
   font-weight: bold;
@@ -66,9 +99,7 @@ th {
   padding-left: 8px;
 }
 
-.acao-cell {
-  min-width: 160px;
-}
+.acao-cell { min-width: 160px; }
 
 .acao-input {
   width: 100%;
@@ -77,50 +108,16 @@ th {
   font-size: 14px;
 }
 
-.btn {
-  cursor: pointer;
-  font-weight: bold;
-  margin-left: 6px;
-}
-
+.btn { cursor: pointer; font-weight: bold; margin-left: 6px; }
 .btn.add { color: #2f5cff; }
 .btn.del { color: #e53935; }
 
-.dia {
-  width: 26px;
-  height: 26px;
-  cursor: pointer;
-  background: #f0f0f0;
-}
+.dia { width: 26px; height: 26px; cursor: pointer; background: #f0f0f0; }
 
 .feito { background: #4CAF50 !important; }
 .parcial { background: #FFC107 !important; }
 .nao { background: #F44336 !important; }
 
-/* MOBILE */
-@media (max-width: 768px) {
-  table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
-  th:first-child,
-  td:first-child {
-    position: sticky;
-    left: 0;
-    background: #fff;
-    z-index: 3;
-  }
-
-  .categoria {
-    position: sticky;
-    left: 0;
-    z-index: 4;
-  }
-}
-
-/* MODAL */
 .modal {
   position: fixed;
   inset: 0;
@@ -151,14 +148,30 @@ th {
 
 <body>
 
-<div class="header">HORÁRIO ESPIRITUAL</div>
+<!-- LOGIN -->
+<div class="login" id="loginTela">
+  <div class="login-box">
+    <h3>Login</h3>
+    <input type="text" id="usuario" placeholder="Usuário">
+    <input type="password" id="senha" placeholder="Senha">
+    <button onclick="logar()">Entrar</button>
+    <button onclick="cadastrar()">Cadastrar</button>
+  </div>
+</div>
+
+<!-- SISTEMA -->
+<div class="sistema" id="sistema">
+
+<div class="header">
+  HORÁRIO ESPIRITUAL - <span id="nomeUsuario"></span>
+  <button onclick="alterarSenha()">Alterar Senha</button>
+  <button id="btnExcluir" onclick="excluirUsuario()" style="display:none;">
+    Excluir Usuário
+  </button>
+  <button onclick="sair()">Sair</button>
+</div>
 
 <div class="controls">
-  <select id="pessoa">
-    <option>Eduardo</option>
-    <option>Alessandra</option>
-  </select>
-
   <select id="mes">
     <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
     <option>Abril</option><option>Maio</option><option>Junho</option>
@@ -172,7 +185,7 @@ th {
 </div>
 
 <div class="container">
-<table id="tabela">
+<table>
 <thead>
 <tr>
   <th>AÇÃO</th>
@@ -183,6 +196,8 @@ th {
 </thead>
 <tbody id="tbody"></tbody>
 </table>
+</div>
+
 </div>
 
 <!-- MODAL -->
@@ -197,6 +212,79 @@ th {
 </div>
 
 <script>
+
+// ===== USUÁRIOS =====
+let usuarios = JSON.parse(localStorage.getItem("usuarios")) || {
+  "Eduardo": { senha: "123", master: true }
+};
+
+let usuarioLogado = null;
+
+// ===== LOGIN =====
+function logar(){
+  const u = usuario.value;
+  const s = senha.value;
+
+  if(usuarios[u] && usuarios[u].senha === s){
+    usuarioLogado = u;
+    nomeUsuario.innerText = u;
+
+    loginTela.style.display = "none";
+    sistema.style.display = "block";
+
+    carregar();
+    mostrarMaster();
+  } else {
+    alert("Usuário ou senha incorretos!");
+  }
+}
+
+function cadastrar(){
+  const novo = prompt("Nome do novo usuário:");
+  if(!novo) return;
+
+  if(usuarios[novo]){
+    alert("Usuário já existe!");
+    return;
+  }
+
+  usuarios[novo] = { senha: "123", master: false };
+  localStorage.setItem("usuarios", JSON.stringify(usuarios));
+
+  alert("Usuário criado com senha padrão: 123");
+}
+
+function alterarSenha(){
+  const nova = prompt("Nova senha:");
+  if(!nova) return;
+
+  usuarios[usuarioLogado].senha = nova;
+  localStorage.setItem("usuarios", JSON.stringify(usuarios));
+
+  alert("Senha alterada!");
+}
+
+function excluirUsuario(){
+  const alvo = prompt("Qual usuário deseja excluir?");
+  if(!alvo || alvo === "Eduardo") return alert("Não pode excluir o master!");
+
+  delete usuarios[alvo];
+  localStorage.setItem("usuarios", JSON.stringify(usuarios));
+
+  alert("Usuário excluído!");
+}
+
+function mostrarMaster(){
+  if(usuarios[usuarioLogado].master){
+    btnExcluir.style.display = "inline-block";
+  }
+}
+
+function sair(){
+  location.reload();
+}
+
+// ===== TABELA =====
 const categorias = [
   "Vinculação comigo mesmo",
   "Vinculação com Deus",
@@ -204,7 +292,6 @@ const categorias = [
   "Vinculação com o trabalho"
 ];
 
-const tbody = document.getElementById("tbody");
 let celulaAtual = null;
 
 function montarTabela(){
@@ -242,39 +329,45 @@ function aplicarClique(){
   document.querySelectorAll(".dia").forEach(c=>{
     c.onclick = ()=>{
       celulaAtual = c;
-      document.getElementById("modal").style.display = "flex";
+      modal.style.display = "flex";
     };
   });
 }
 
 function setStatus(status){
   celulaAtual.className = "dia " + status;
-  document.getElementById("modal").style.display = "none";
+  modal.style.display = "none";
 }
 
 function salvar(){
-  const key = pessoa.value + mes.value + ano.value;
+  document.querySelectorAll(".acao-input").forEach(input=>{
+    input.setAttribute("value", input.value);
+  });
+
+  const key = usuarioLogado + mes.value + ano.value;
   localStorage.setItem(key, tbody.innerHTML);
-  alert("Salvo com sucesso!");
+
+  alert("Salvo!");
 }
 
 function carregar(){
-  const key = pessoa.value + mes.value + ano.value;
+  const key = usuarioLogado + mes.value + ano.value;
   const dados = localStorage.getItem(key);
+
   if(dados){
     tbody.innerHTML = dados;
     aplicarClique();
-  } else montarTabela();
+  } else {
+    montarTabela();
+  }
 }
 
-/* ano */
-const anoSel = document.getElementById("ano");
+// ANO
 const atual = new Date().getFullYear();
-for(let a=atual;a<=atual+5;a++) anoSel.innerHTML += `<option>${a}</option>`;
+for(let a=atual;a<=atual+5;a++) ano.innerHTML += `<option>${a}</option>`;
 
-pessoa.onchange = mes.onchange = ano.onchange = carregar;
+mes.onchange = ano.onchange = carregar;
 
-montarTabela();
 </script>
 
 </body>
